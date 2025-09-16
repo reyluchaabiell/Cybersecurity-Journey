@@ -152,3 +152,5 @@ Fundamental penting: security awareness untuk pengguna, red team/blue team exerc
 Langkah praktis / contoh: rutin phishing simulation, run purple team exercise, buat dashboard metrik sederhana, adakan post-incident review & update kebijakan.
 Pertanyaan refleksi: Apa 3 metrik paling berguna untuk menilai kesehatan keamananmu? Apa latihan yang bisa dijalankan bulan ini?
 
+
+Thank you for taking the time to read my notes, I truly appreciate it!
