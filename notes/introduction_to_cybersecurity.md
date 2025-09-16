@@ -1,4 +1,5 @@
 English Version:
+
 🎮 Introduction to Cybersecurity — Make it Simple! 
 🔐 What is Cybersecurity?
 Imagine the digital world is a big house full of toys. Cybersecurity’s job is to be the guard 🛡️, the lock 🔒, and the police 👮 so your house and toys stay safe from thieves, vandals, or pranksters.
@@ -86,7 +87,11 @@ Security Engineer (builder of defenses 🏗️): designs tougher doors and locks
 🌐 Keeps digital life running — so services and the internet keep working.
 
 
+
+
+
 Indonesia Version:
+
 Introduction to Cybersecurity – Make it Simple! 
 
 Apa itu Cybersecurity?
