@@ -1,1 +1,1 @@
-Ini adalah folder dimana saya akan berbagi pemahaman saya mengenai Cybersecurity secara mendalam.
+This is the space where I’ll drop my thoughts and insights on Cybersecurity.
