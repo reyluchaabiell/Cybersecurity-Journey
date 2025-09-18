@@ -1,0 +1,25 @@
+Infinity Shell
+
+
+Today
+
+ 
+
+Cipher’s legion of bots has exploited a known vulnerability in our web application, leaving behind a dangerous web shell implant. Investigate the breach and trace the attacker's footsteps!
+
+Note: Click the Start Machine button to spawn the Virtual Machine.
+
+Sesuai informasi yang kita ketahui titik serang kita berada pada web application yang kita miliki, berarti hal pertama yang harus kita cek adalah 
+log tempat pantauan atau cctv sebuah website yaitu berada pada /var/log/apache2 direktori itulah tempat log yang menyimpan aktivitas website
+
+arahkan dengan cd /var/log/apache2
+kemudia kita list apa yang berada pada folder
+ternyata ada 5 file, analisa satu persatu file kita cari sebuah log yang mencurigakan kemudian pada analisa file other_vhosts_access.log.1 terakhir kita menemukan isi 
+yang begitu banyak kemungkinan inilah file yang dicari kemudian setelah analisa kita akan menemukan baris yang suspicious pada log ini
+Indikator krusial terletak mulai pada baris 10.11.93.143 - - [06/Mar/2025:09:50:57 +0000] "GET /CMSsite-master/img/images.php?query=d2hvYW1pCg== HTTP/1.1" 200 212 "-" "Mozilla/5.0 (…) Chrome/133.0.0.0 Safari/537.36"
+Mengapa? karena folder `img/` seharusnya hanya berisi gambar, bukan PHP. Ini penting karena menunjukkan attacker menyembunyikan dan menjalankan perintah shell di lokasi yang seharusnya “aman” pada baris terlihat terlihat juga terdapat base64 sebagai indikasi sebuah perintah terselubung sang attacker
+Kemudian kita akan memasak Base64 ini dengan Tool CyberChef dengan resep: from Base64
+masukkan beberapa Base64 yang terekam pada log kita akan temukan flagnya pada Base64 ini: ZWNobyAnVEhNe3N1cDNyXzM0c3lfdzNic2gzbGx9Jwo
+Kita masak dan hidangan pun jadi. 
+flag: THM{sup3r_34sy_w3bsh3ll}
+
