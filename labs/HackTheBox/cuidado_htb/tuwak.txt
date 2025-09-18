@@ -1,0 +1,84 @@
+HTB Room: Cuidado - TuWak
+
+Sherlock Scenario - Ringkasan Kasus
+
+Seorang user memicu beberapa peringatan setelah mendownload banyak PUA (Potentially Unwanted Applications). Tim keamanan kemudian memonitor trafik jaringan dari workstation user tersebut untuk menganalisis apakah ada ancaman malware yang lebih serius.
+
+🎯 Tujuan Investigasi
+
+Melalui traffic capture (PCAP), kita menyelidiki:
+
+IP korban & penyerang
+
+File mencurigakan yang pertama kali diunduh
+
+Payload command dan teknik
+
+Bukti eksekusi malware & analisis file
+
+Teknik MITRE ATT&CK terkait aktivitas
+
+🔍 Langkah-Langkah Investigasi: 
+- Q1: What is the victim's IP address?
+Buka file .pcap yang disediakan setelah terbuka arahkan pada menu statics - conversations - pilih IPv4 
+perhatikan pada address A yang paling banyak muncul lah adalah seorang korbannya
+ans: 192.168.1.152
+
+- Q2: What is the IP address of the attacker from whom the files were downloaded?
+Masih dalam tampilan conversation ipv4, perhatikan pada kolom packets atau bytes biasanya yang berukuran besar itu adalah attacker
+ans: 94.156.177.109
+
+- Q3: Which malicious file appears to be the first one downloaded?
+Kembali pada tampilan file.pcap selanjutnya anda harus memilih menu File - Export Object - HTTP... pada tampilan anda akan melihat berbagai macam log data
+anda harus berfokus pada hostname attacker yang telah kita dapatkan analisa dari atas kebawah pada bagian filename dan anda akan menemukannya
+ans: sh
+
+- Q4: What is the name of the function that the attacker used to download the payload?
+KLik pada file sh kemudian arahkan untuk save file namai dengan bebas contoh payload.txt dan kemudian buka pada text editor cari nama function yang 
+tertera pada kode yang anda buka function terletak pada baris 3
+ans: dlr  
+
+- Q5: Which port does the attacker's server use?
+Masih pada file sh pada baris ke 6 anda akan menemukan baris kode yang terdapat sebuah port yang dimaksud
+ans: 80
+
+- Q6: The script checks which directories it can write to by attempting to create test files. What is the size of the second test file? (Size in MB)
+Analisa kembali file sh pada baris kode ke 25 akan tertera kode yang dapat membuat sebuah file kedalam ukuran MB bs=2M
+ans: 2MB
+
+- Q7: What is the full command that the script uses to identify the CPU architecture?
+Pada baris 21 di file sh anda akan menemukan sebuah full command yang mendeklarasikan sebuah command didalam parameter untuk identify the CPU architecture
+ans: uname -mp
+
+- Q8: What is the name of the file that is downloaded after the CPU architecture is compared with reference values?
+Cek pada baris ke 37 saat kode membuat perbandingan
+ans: x86_64
+
+- Q9: What is the full command that the attacker used to disable any existing mining service?
+Kembali pada tampilan Export Objects HTTP... disana anda akan melihat file name clean mari kita save file tersebut dan inspect kode didalammnya
+anda akan menemukan di baris 9 kode tersebut akan disable any existing mining service
+ans: systemctl disable c3pool_miner
+
+- Q10: Apparently, the attacker used a packer to compress the malware. Which version of this packer was used? (Format X.XX)
+Referensi berasal dari file sh setelah kita ketahui file sh akan membuat sebuah file dengan nama x86_64, maka dari itu pada halaman Export Objects HTTP...
+save filename x86_64 kemudian setelahnya pada terminal gunakan perintah strings x86_64 | grep -i upx agar kita dapat tahu versi dari packer
+ans: 4.23
+
+- Q11: What is the entropy value of unpacked malware?
+Kita unpacked file x86_64 dengan perintah CLI upx -d x86_64 setelah proses unpack kamu dapat menemukan value entropy dengan CLI ent x86_64
+ans: 6.488449
+
+- Q12: What is the file name with which the unpacked malware was submitted on VirusTotal?
+Mencari file name pertama di VirusTotal dengan cara anda harus mendapatkan hash file dengan CLI sha256sum x86_64
+61c128f1e5225e9d230d7fffa66468286c16fe622a7edee661fefe115698656c  x86_64 masukan hash ke VirusTotal kemudian cek pada bagian detail dan
+scroll ke bagian Names cari di bagian paling bawah awal itu adalah nama awal file
+ans: redtail.cuidado
+
+- Q13: What MITRE ATT&CK technique ID is associated with the main purpose of the malware?
+Perhatikan kembali pada halaman VirusTotal lihat beberapa vendor malware terkait seperti 
+CoinMiner, XMRig, xmrig, malxmr, fxmlk, Tools seperti Tool.Linux.BtcMine.9999, Miner:Multi/XmrigGo.SY, dll.
+Jenis malware ini digunakan untuk cryptocurrency mining secara ilegal (cryptojacking). 
+Jadi malware ini menyalahgunakan resource sistem korban untuk menambang koin seperti Monero (XMR), tanpa izin pengguna.
+buka halaman MITRE ATT&CK pada menu pencarian cari cryptocurrency mining pada bagian paling awal kita klik pada halaman ShadowRay scroll pada techiques used
+cari keterangan yang berkaitan pada cryptocurrency mining, disitu teknik terlampir ada Resource Hijacking pada keterangan sudah sesuai dengan tujuan malware
+ans: T1496
