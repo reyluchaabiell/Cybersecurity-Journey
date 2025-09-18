@@ -1,1 +1,101 @@
 
+Oke Reylucha, berikut **ringkasan lengkap alur analisis Room THM "Directory"** yang simpel tapi tetap jelas, supaya gampang diingat dan bisa jadi bekal kalau ketemu kasus serupa lagi.
+
+---
+
+## **🧠 Mindmap: Attack Flow (Step by Step)**
+
+### **1️⃣ Recon – Port Scanning**
+
+* Attacker melakukan **port scan** pada server target.
+* Ditemukan 13 sesi port scanning awal berdasarkan analisis waktu
+
+53,80,88,135,139,389,445,464,593,636,3268,3269,5357
+
+  ➤ *Port ini menunjukkan adanya layanan HTTP, Kerberos (88), RPC (135), dan SMB (445).*
+
+---
+
+### **2️⃣ User Enumeration**
+
+* Attacker mencoba brute-force/enum user di layanan **Kerberos (AS-REP)** atau **SMB**.
+* Empat user valid ditemukan, tapi hanya **`directory.thm\larry.doe`** yang berhasil digunakan untuk login.
+
+---
+
+### **3️⃣ Hash Capture (AS-REP Roasting Attack)**
+
+* Karena **Larry.doe** tidak memerlukan pre-authentication, attacker bisa meminta ticket Kerberos (AS-REP).
+* `traffic.pcap` merekam paket **Kerberos** berisi `kerberos.cipher` (hash) yang bisa diekstrak:
+
+  ```bash
+  tshark -r traffic.pcap -Y 'kerberos and kerberos.CNameString=="larry.doe"' \
+  -T fields -e kerberos.cipher | tail -n 1
+  ```
+ Ambil **30 karakter terakhir hash** sebagai jawaban.
+
+---
+
+### **4️⃣ Password Cracking**
+
+* Hash diformat menjadi **hashcat mode 18200 (\$krb5asrep\$23\$)**:
+
+  ```bash
+  hashcat -m 18200 larry_hash.txt /usr/share/wordlists/rockyou.txt
+  ```
+* Password ditemukan: **`Password1!`**
+
+---
+
+### **5️⃣ Lateral Movement (WinRM Access)**
+
+* Attacker login ke server via **WinRM (port 5985)** menggunakan password tersebut.
+* Komunikasi terenkripsi, tapi bisa didekripsi dengan:
+
+  ```bash
+  python3 decrypt_winrm.py -p 'Password1!' traffic.pcap > decrypted.txt
+  ```
+* Dari hasil decrypt → attacker menjalankan perintah:
+
+  ```
+  whoami /all
+  reg save HKLM\SYSTEM C:\SYSTEM
+  reg save HKLM\SAM C:\SAM
+  reg save HKLM\SECURITY C:\SECURITY
+  ```
+ini command 1 dan saat attacker memulai aksi → `reg save HKLM\SYSTEM C:\SYSTEM,reg save HKLM\SAM C:\SAM
+
+---
+
+### **6️⃣ Data Extraction & Flag**
+
+* Setelah dump registry, attacker mendapatkan file SAM dan SYSTEM.
+* Di akhir traffic, terdapat string flag:
+
+  ```
+  THM{Ya_G0t_R0aSt3d!}
+  ```
+* Ini menandakan serangan berbasis **Kerberos Roasting** yang berhasil.
+
+---
+
+## **🔑 Pelajaran Penting dari Room Ini**
+
+* **Selalu cek protokol utama** dalam PCAP: SMB, Kerberos, HTTP, WinRM.
+* **Kerberos (AS-REP)** bisa memberikan hash yang bisa di-crack offline.
+* **Tshark filters** (`kerberos.CNameString`, `kerberos.cipher`) sangat membantu mengisolasi data penting.
+* **Password reuse + layanan manajemen jarak jauh (WinRM)** memudahkan attacker bergerak lebih dalam.
+* **Flag** biasanya muncul setelah tahap post-exploitation (dumping data/registry).
+
+---
+
+⚡ **Quick Checklist Investigasi:**
+
+1. Filter port terbuka.
+2. Cari user yang digunakan attacker.
+3. Cari hash → Kerberos atau NTLM.
+4. Crack hash → dapat password.
+5. Analisis perintah via WinRM/RDP.
+6. Ambil flag.
+
+
