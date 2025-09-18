@@ -1,0 +1,48 @@
+Hide and Seek - THM ROOM
+Instruction: 
+
+
+Today
+A note was discovered on the compromised system, taunting us. It suggests multiple persistence mechanisms have been implanted, ensuring that Cipher can return whenever he pleases. Here’s the note:
+
+Dear Specter,
+I must say, it’s been a thrill dancing through your systems. You lock the doors; I pick the locks. You set up alarms; I waltz right past them. But today, my dear adversary, I’ve left you a little game.
+
+I've sprinkled a few persistence implants across your system, like digital Easter eggs, and I’m giving you a sporting chance to find them. Each one has a clue because where’s the fun in a silent hack?
+
+    Time is on my side, always running like clockwork.
+    A secret handshake gets me in every time.
+    Whenever you set the stage, I make my entrance.
+    I run with the big dogs, booting up alongside the system.
+    I love welcome messages.
+    
+Find them all, and you might earn a little respect. Miss one, and well… let's say I’ll be back before you even realize I never left. Happy hunting, Specter. May the best ghost win.
+- Cipher
+
+
+Pahami intruksi terlebih dahulu kita dijelaskan mendapatkan 5 clue utama yang harus kita cari 
+
+Mari kita siapkan vm dan mari kita mulai ke clue pertama
+- Time is on my side, always running like clockwork.
+= berarti ada sistem yang berjalan berkala dengan cek cron aktivitas di var/log/syslog.1 anda akan temukan
+hasil setelah kita decode = THM{y0
+
+- A secret handshake gets me in every time.
+= mari lanjutkan penelusuran ke SSH karena ada secret handshake berarti ada otentikasi pasti dengan cek .ssh/authorized_keys yang ada pada direktori home/zeroday/.ssh/authorized_keys karena folder ini yang memiliki ssh
+326e6420706172743a20755f6730745f = u_g0t_
+
+- Whenever you set the stage, I make my entrance.
+= maksudnya berarti setiap kali login/interaktif shell diinisiasi, berarti kita harus cek shell profile dengan mengecek seluruh .bashrc yang berada di home sesuai nama pada instruksi saya akan cek folder cat specter/.bashrc anda akan temukan part 3
+4d334a6b58334130636e513649444e324d334a3564416f3d = 3v3ryt
+
+
+- I run with the big dogs, booting up alongside the system.
+= berarti dia dapat melakukan start otomatis saat boot berarti berada di systemd service/init script
+cek seluruh systemd service dengan: systemctl list-units --type=service --all  pada hasil kita temukan service mencurigakan dengan nama cipher.service
+berarti mari kita perdalam lagi dengan cek systemnya cat /lib/systemd/system/cipher.service dan kita temukan bagian part 4 dari Base64 NHRoIHBhcnQgLSBoMW5nXyAK = h1ng_
+
+- I love welcome messages.
+= cek dibagian update-motd.d disalah satu file akan ada hex dan kita decode
+4c61737420706172743a206430776e7d0 = d0wn}
+
+bila disatukan jadi : THM{y0u_g0t_3v3ryth1ng_d0wn}
