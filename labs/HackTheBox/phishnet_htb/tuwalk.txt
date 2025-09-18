@@ -1,0 +1,100 @@
+🕵️‍♂️ PhishNet – Sherlock Scenario (Walkthrough)
+
+Scenario:
+The accounting team receives an urgent payment request email from a seemingly legitimate vendor. However, the email contains a suspicious link and a .zip attachment containing malware. Our task: analyze the email and uncover the attacker’s scheme.
+
+1️⃣ Preparation
+
+File we have: email.eml (from PhishNet.zip)
+
+Tools you can use:
+
+Linux CLI: cat, less, grep, unzip, sha256sum
+
+Safe email client: Thunderbird (sandbox recommended)
+
+Security tips:
+
+Do not click links or open attachments on your main machine.
+
+Use a VM or sandbox to safely analyze malicious files.
+
+2️⃣ Email Header Analysis
+
+Open .eml using:
+cat email.eml | less
+
+check important headers:
+| Question                       | Header / Answer                                                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| **Originating IP**             | `X-Originating-IP: [45.67.89.10]` → **45.67.89.10**                                                                |
+| **Mail server relaying email** | `Received: from mail.business-finance.com ([203.0.113.25])` → **203.0.113.25**                                     |
+| **Sender email**               | `From: finance@business-finance.com` → **[finance@business-finance.com](mailto:finance@business-finance.com)**     |
+| **Reply-To email**             | `Reply-To: support@business-finance.com` → **[support@business-finance.com](mailto:support@business-finance.com)** |
+| **SPF result**                 | `spf=pass (domain business-finance.com designates 45.67.89.10 as permitted sender)` → **pass**                     |
+
+Note: SPF pass indicates the email was sent from a server allowed by the domain, but it doesn’t guarantee the email is safe — phishing is still possible.
+
+
+3️⃣ Email Body Analysis
+
+Look for phishing links and attachments in the email body:
+<a href="https://secure.business-finance.com/invoice/details/view/INV2025-0987/payment">Download Invoice</a>
+Phishing URL domain: secure.business-finance.com
+
+Attachment name: Invoice_2025_Payment.zip
+
+Fake company name: Business Finance Ltd.
+
+Tip: Never click the link. Just note the domain for analysis.
+
+4️⃣ Inspecting the ZIP Attachment
+
+To safely check the files inside the ZIP without executing anything:
+unzip -l Invoice_2025_Payment.zip
+
+Output example:
+invoice_document.pdf.bat
+
+Malicious file inside ZIP: invoice_document.pdf.bat
+
+Compute SHA-256 hash (for HTB submission):
+sha256sum Invoice_2025_Payment.zip
+
+Output:
+8379C41239E9AF845B2AB6C27A7509AE8804D7D73E455C800A551B22BA25BB4A
+
+.bat files can contain malware; do not execute them on your main system.
+
+5️⃣ Mapping to MITRE ATT&CK
+| Stage          | Technique | Sub-technique                              | Reason                                       |
+| -------------- | --------- | ------------------------------------------ | -------------------------------------------- |
+| Initial Access | T1566     | T1566.001 (Spearphishing Attachment)       | Email contains a `.zip` attachment           |
+| Execution      | T1204     | T1204.002 (User Execution: Malicious File) | The `.bat` file must be executed by the user |
+
+HTB usually expects T1566.001 as the answer.
+
+6️⃣ Summary of Answers for Sherlock Scenario
+| Question                   | Answer                                                              |
+| -------------------------- | ------------------------------------------------------------------- |
+| Originating IP             | 45.67.89.10                                                         |
+| Mail server relayed        | 203.0.113.25                                                        |
+| Sender email               | [finance@business-finance.com](mailto:finance@business-finance.com) |
+| Reply-To email             | [support@business-finance.com](mailto:support@business-finance.com) |
+| SPF result                 | pass                                                                |
+| Phishing URL domain        | secure.business-finance.com                                         |
+| Fake company name          | Business Finance Ltd.                                               |
+| Attachment name            | Invoice\_2025\_Payment.zip                                          |
+| SHA-256 hash of attachment | 8379C41239E9AF845B2AB6C27A7509AE8804D7D73E455C800A551B22BA25BB4A    |
+| Filename malicious file    | invoice\_document.pdf.bat                                           |
+| MITRE ATT\&CK              | T1566.001                                                           |
+
+✅ Quick Learning Tips
+
+Headers = Email “ID card” → always check Received, From, Reply-To, SPF.
+
+Body = link + attachment → don’t click; note suspicious domains or filenames.
+
+ZIP = safe inspection → check filenames and compute hash in sandbox.
+
+MITRE mapping → understand attack stages: phishing → execution → evasion.
