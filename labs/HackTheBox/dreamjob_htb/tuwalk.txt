@@ -1,0 +1,68 @@
+HTB ROOM Dream Job-1
+
+Sherlock Scenario
+
+You are a junior threat intelligence analyst at a Cybersecurity firm. You have been tasked with investigating a Cyber espionage campaign known as Operation Dream Job. The goal is to gather crucial information about this operation.
+
+
+Download file room hacktheblue
+
+Disini kita akan menggunakan Framework MITRE ATT&CK
+
+-Q1: Who conducted Operation Dream Job?
+Cara menemukan? buka halaman website https://attack.mitre.org pergi ke menu CTI - pilih Campaigns
+pada campaigns gunakan filter CTRL + F dan cari kata Dream Job klik menu Operation Dream Job dan disitu tertera deskripsi jelas
+Answer: Lazarus Group
+
+-Q2: When was this operation first observed?
+Cara menemukan? masih dihalaman yang sama dikanan halaman anda akan melihat first seen
+Answer: September 2019
+
+-Q3: There are 2 campaigns associated with Operation Dream Job. One is Operation North Star, what is the other?
+Cara menemukan? dibawah bagian dari jawaban Q2 disana juga tertera campaigns associated
+Answer: Operation Interception
+
+-Q4: During Operation Dream Job, there were the two system binaries used for proxy execution. One was Regsvr32, what was the other?
+Cara menemukan? buka jendela ATT&CK Navigator Layers cari di bagian System Binary Proxy Execution itu ada di Defense Evasion
+Answer: Rundll32
+
+-Q5: What lateral movement technique did the adversary use?
+Cara menemukan? geser ke kanan Lateral Movement disitu anda akan menemukan
+Answer: Internal Spearphising
+
+-Q6: What is the technique ID for the previous answer?
+Cara menemukan? klik kanan technique pada pertanyaan sebelumnya anda akan temukan ID
+Answer: T1534
+
+-Q7: What Remote Access Trojan did the Lazarus Group use in Operation Dream Job?
+Cara menemukan? di section halaman MITRE cari bagian Software disana anda akan melihat deskripsi software yang menjerumus ke remote access.
+Answer: DRATzarus
+
+-Q8: What technique did the malware use for execution?
+Cara menemukan? arahkan pada navigator dibagian section sofware pada jawaban sebelumnya pada proses execution terlihat 
+Answer: Native API
+
+-Q9: What technique did the malware use to avoid detection in a sandbox?
+Cara menemukan? dibagian navigator pada proses Discovery lihat bagian technique yang berkaitan virtualization/sandbox evasion
+Answer: Time Based Evasion
+
+-Q10: To answer the remaining questions, utilize VirusTotal and refer to the IOCs.txt file. What is the name associated with the first hash provided in the IOC file?
+Cara menemukan? arahkan ke website https://www.virustotal.com gunakan hash pertama pada IOCs.txt untuk di analisa
+Answer: IEXPLORE.EXE
+
+-Q11: When was the file associated with the second hash in the IOC first created?
+Cara menemukan? gunakan hash kedua pada file .txt analisa dengan virustotal buka halaman Details - History
+Answer: 2020-05-12 19:26:17
+
+-Q12: What is the name of the parent execution file associated with the second hash in the IOC?
+Cara menemukan? dihalaman virustotal Relations - Execution Parents
+Answer: BAE_HPC_SE.iso
+
+-Q13: Examine the third hash provided. What is the file name likely used in the campaign that aligns with the adversary's known tactics?
+Cara menemukan? analisa virustotal pada hash ketiga di Details - Names seperti yang kita tahu korban adalah job seeker ambil yang spesifik berkaitan nama filenya
+Answer: Salary_Lockheed_Martin_job_opportunities_confidential.doc
+
+-Q14: Which URL was contacted on 2022-08-03 by the file associated with the third hash in the IOC file?
+Cara menemukan? cari di halaman Relations - Contacted URLs cari yang berkaitan berdasarkan waktu 2022-08-03
+Answer: https://markettrendingcenter.com/lk_job_oppor.docx
+ 
