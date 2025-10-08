@@ -1,0 +1,216 @@
+Oke kali ini kita akan menyelsaikan Challenge Room THM Forensics
+intro: This is a memory dump of compromised system, do some forensics kung-fu to explore the inside.
+
+We will use tool Volatility
+What is Volatility?
+Volatility itu kacamata X-Ray buat ngintip isi RAM, supaya kita bisa nyari jejak hacker.
+
+Lets turn on the question
+
+Q1.Download the victim.zip
+no need answer
+
+Q2.What is the Operating System of this Dump file? (OS name)
+hint: how about some KDBG search
+how to response: hint KDBG search itu sudah tidak berlaku pada sekarang itu digunakan saat Volatility 2
+sekarang kita gunakan command plugin windows.info untuk Volatility 3 itu akan otomatis melihat OS apa yang digunakan
+Jawaban: Windows
+
+Q3.What is the PID of SearchIndexer? 
+hint: let's check terminated or hidden process list
+how to response: karena clue mengatakan processnya terminated atau hidden, berarti plugin windows.pslist tidak akan bekerja karena itu hanya melihat proses aktif, jadi kita gunakan plugin windows.psscan fungsinya dipakai untuk “menyisir” (scan) seluruh memory dump dan mencari jejak struktur proses (EPROCESS) walaupun prosesnya udah terminate/hidden, gunakan grep -i agar bisa langsung temukan proses SearchIndexer
+Jawaban: 2180 (nomor awal yang muncul)
+
+Q4.What is the last directory accessed by the user?
+(The last folder name as it is?)
+hint: Why don't you search a bag full of shells in your backyard?
+how to response: gunakan Volatility 2 untuk hasil yang cepat dikarenakan Volatility 3 belum menyediakan plugin serupa, jadi gunakan plugin shellbags di VOL2
+Jawaban: deleted_files
+
+Q5.There are many suspicious open ports; which one is it? (ANSWER format: protocol:port)
+hint: Write first one.
+how to response: ambil bagian pertama dari hasil menggunakan plugin windows.netscan, fungsi plugin yang digunakan untuk men-scan semua koneksi jaringan yang aktif atau sebelumnya ada di memory dump Windows.
+Jawaban: UDP:5005
+
+Q6.Vads tag and execute protection are strong indicators of malicious processes; can you find which they are? (ANSWER format: Pid1;Pid2;Pid3) 
+hint: There are only 3 pids meeting this criteria.
+how to response: gunakan command berikut python3 vol.py -f victim.raw -r json windows.vadinfo > vad.json windows.vadinfo adalah plugin Volatility 3 yang membaca dan menampilkan VAD (Virtual Address Descriptor) dari proses di memory dump.
+setelah itu kita harus memphrase hasil file json dengan kode pyton berikut untuk temukan PID yang menggunakan "PAGE_EXECUTE_READWRITE"
+source code py:
+import json
+
+# Load VAD json
+with open("vad.json", "r") as f:
+    vad_data = json.load(f)
+
+# Filter untuk Protection == PAGE_EXECUTE_READWRITE
+pids = set()
+for entry in vad_data:
+    prot = entry.get("Protection", "")
+    if prot.upper() == "PAGE_EXECUTE_READWRITE":
+        pid = entry.get("PID") or entry.get("pid")
+        if pid:
+            pids.add(pid)
+
+# Ambil 3 PIDs pertama (sorted)
+top3 = sorted(pids)[:3]
+
+# Output sesuai format
+print(";".join(str(pid) for pid in top3))
+
+Q7.'www.go****.ru' (write full url without any quotation marks)
+hint: This site is little naughty
+how to response: kita cari dengan command strings -a -n 6 victim.raw | grep -Eio "https?://[^[:space:]]*www\.go[^[:space:]]*\.ru|www\.go[^[:space:]]*\.ru" | sort -u
+Perintah ini mengeksktrak semua URL/website yang match domain tertentu dari file memory dump, terus bikin list unik supaya gampang dibaca.
+Jawaban: www.goporn.ru
+
+Q8.'www.i****.com' (write full url without any quotation marks)
+hint: Do you like football?
+how to response: cukup membingungkan kita masih gunakan command sama seperti sebelumnya tetapi ada bagian yang kita rubah sesuai kebutuhan
+command: strings -a -n 6 victim.raw | grep -Eio "https?://[^[:space:]]*www\.i[^[:space:]]*\.com|www\.i[^[:space:]]*\.com" | sort -u
+kukira Football itu sepak bola ternyata yang dimaksud olahraga khas amerika, likely refers to either the recently departed UCLA defensive coordinator Ikaika Malloe or the Brazilian football legend Kaká (whose name sounds like "Kah-KAH/ikaka")
+Jawaban: www.ikaka.com
+
+Q9.'www.ic******.com'
+hint: Very strong IOC
+how to response: gunakan dengan beberapa modifikasi command: strings -a -n 6 victim.raw | grep -Eio "https?://[^[:space:]]*www\.ic[^[:space:]]*\.com|www\.ic[^[:space:]]*\.com" | sort -u
+kita menemukan 4 kriteria sesuai dan yang paling masuk akal ICSALabs memang terkait security testing & malware research, jadi muncul di memory sebagai indikator kompromi (IOC) itu logis.
+Jawaban: www.icsalabs.com
+
+Q10.202.***.233.*** (Write full IP)
+how to response: saya pikir saya menyukai tool strings sekarang karena kita menggunakan kombinasi dengan regex memudahkan kita menemukan kata terkait atau angka, saya menggunakan command ini: strings -a -n 6 victim.raw | grep -Eo '202\.[0-9]{1,3}\.233\.[0-9]{1,3}' | sort -u
+Jawaban: 202.107.233.211
+
+Q11.***.200.**.164 (Write full IP)
+how to response: gunakan command yang sama denga beberapa perubahan kecil: strings -a -n 6 victim.raw | grep -Eo '[0-9]{1,3}\.200\.[0-9]{1,2}\.164' | sort -u
+Jawaban: 209.200.12.164
+
+Q12.209.190.***.***
+how to response: sama seperti sebelumnya: strings -a -n 6 victim.raw | grep -Eo '209\.190\.[0-9]{1,3}\.[0-9]{1,3}' | sort -u
+Jawaban: 209.190.122.186
+
+Q13.What is the unique environmental variable of PID 2464?
+how to response: kita akan gunakan plugin windows.envars karena akan tampilkan semua environment variables yang dimiliki proses dengan PID 2464 (PATH, TEMP, USERNAME, dll).
+setelah analisa ada variabel yang tidak biasa yaitu OANOCACHE, kita verifikasi jika memang variabel itu hanya terdapat di di PID ini dan hasilnya:
+┌──(vol3env)─(kali㉿kali)-[~/Documents/theroom/forensics_thm/volatility3]
+└─$ python3 vol.py -f victim.raw windows.envars | grep -i "OANOCACHE" -n
+
+821:2464        wmpnetwk.exe    0x2a1df0        OANOCACHE       1
+                                                                           
+Jawaban: OANOCACHE
+
+konklusi:
+di room challenge ini kita mempelajari tentang cara investigasi memory forensics dengan Volatility dan juga pemaksimalan penggunaan bash dari Linux untuk menemukan informasi secara spesifik dengan regex ataupun fungsi lainnya yang membantu dalam analisa, tantangan yang dihadapi bukan soal susahnya mencari jawaban tetapi pada konfigurasi teknis mengenai tata cara mengunduh Volatility dan juga dipengaruhi lama nya room ini dibuat, jadinya kita harus dapat menyesuaikan tools yang digunakan pada saat ini. 
+
+
+
+
+English ver:
+Oke we will finished the Challenge Room THM Forensics
+intro: This is a memory dump of compromised system, do some forensics kung-fu to explore the inside.
+
+We will use tool Volatility
+What is Volatility?
+Volatility is an X‑Ray glasses to peek inside RAM so we can find traces of a hacker.
+
+Let’s turn on the questions
+
+Q1. Download the victim.zip
+no need to answer
+
+Q2. What is the Operating System of this Dump file? (OS name)
+hint: how about some KDBG search
+how to respond: note that KDBG search is no longer applicable — it was used in Volatility 2. Now we use the plugin windows.info for Volatility 3 which will automatically detect the OS used.
+Answer: Windows
+
+Q3. What is the PID of SearchIndexer?
+hint: let’s check terminated or hidden process list
+how to respond: because the clue says the process is terminated or hidden, the plugin windows.pslist won’t work (it only shows active processes). Instead use windows.psscan, which “combs” (scans) the entire memory dump and finds process structures (EPROCESS) even if the process has been terminated/hidden. Use grep -i to directly find the SearchIndexer process.
+Answer: 2180 (the first number that appears)
+
+Q4. What is the last directory accessed by the user?
+(The last folder name as it is?)
+hint: Why don’t you search a bag full of shells in your backyard?
+how to respond: use Volatility 2 for a faster result because Volatility 3 does not yet provide a similar plugin, so use the shellbags plugin in VOL2.
+Answer: deleted_files
+
+Q5. There are many suspicious open ports; which one is it? (ANSWER format: protocol:port)
+hint: Write the first one.
+how to respond: take the first entry from the results of the windows.netscan plugin, which scans all active or previously present network connections in the Windows memory dump.
+Answer: UDP:5005
+
+Q6. VADs tag and execute protection are strong indicators of malicious processes; can you find which they are? (ANSWER format: Pid1;Pid2;Pid3)
+hint: There are only 3 pids meeting this criteria.
+how to respond: run the following command:
+python3 vol.py -f victim.raw -r json windows.vadinfo > vad.json
+windows.vadinfo is the Volatility 3 plugin that reads and outputs VAD (Virtual Address Descriptor) information from processes in the memory dump. After that, parse the JSON output with this Python script to find PIDs using PAGE_EXECUTE_READWRITE:
+
+import json
+
+# Load VAD json
+with open("vad.json", "r") as f:
+    vad_data = json.load(f)
+
+# Filter for Protection == PAGE_EXECUTE_READWRITE
+pids = set()
+for entry in vad_data:
+    prot = entry.get("Protection", "")
+    if prot.upper() == "PAGE_EXECUTE_READWRITE":
+        pid = entry.get("PID") or entry.get("pid")
+        if pid:
+            pids.add(pid)
+
+# Take the first 3 PIDs (sorted)
+top3 = sorted(pids)[:3]
+
+# Output in the required format
+print(";".join(str(pid) for pid in top3))
+
+
+Q7. 'www.go****.ru' (write full url without any quotation marks)
+hint: This site is a little naughty
+how to respond: search with:
+strings -a -n 6 victim.raw | grep -Eio "https?://[^[:space:]]*www\.go[^[:space:]]*\.ru|www\.go[^[:space:]]*\.ru" | sort -u
+This command extracts all URLs/websites that match the domain from the memory dump and produces a unique list for readability.
+Answer: www.goporn.ru
+
+Q8. 'www.i****.com' (write full url without any quotation marks)
+hint: Do you like football?
+how to respond: use the same command as before but adjusted:
+strings -a -n 6 victim.raw | grep -Eio "https?://[^[:space:]]*www\.i[^[:space:]]*\.com|www\.i[^[:space:]]*\.com" | sort -u
+I thought “football” meant soccer, but here it likely refers to American football; it might reference names like the recently departed UCLA defensive coordinator Ikaika Malloe or the Brazilian legend Kaká (whose name sounds like “Kah-KAH/ikaka”).
+Answer: www.ikaka.com
+
+Q9. 'www.ic******.com'
+hint: Very strong IOC
+how to respond: use a slightly modified command:
+strings -a -n 6 victim.raw | grep -Eio "https?://[^[:space:]]*www\.ic[^[:space:]]*\.com|www\.ic[^[:space:]]*\.com" | sort -u
+We found four matches; the most logical is ICSALabs, which is connected to security testing & malware research, so its presence in memory as an IOC makes sense.
+Answer: www.icsalabs.com
+
+Q10. 202.***.233.*** (Write full IP)
+how to respond: I like strings because combining it with regex makes finding related numbers easy. I used:
+strings -a -n 6 victim.raw | grep -Eo '202\.[0-9]{1,3}\.233\.[0-9]{1,3}' | sort -u
+Answer: 202.107.233.211
+
+Q11. ***.200.**.164 (Write full IP)
+how to respond: use the same command with a small change:
+strings -a -n 6 victim.raw | grep -Eo '[0-9]{1,3}\.200\.[0-9]{1,2}\.164' | sort -u
+Answer: 209.200.12.164
+
+Q12. 209.190.***.***
+how to respond: same approach:
+strings -a -n 6 victim.raw | grep -Eo '209\.190\.[0-9]{1,3}\.[0-9]{1,3}' | sort -u
+Answer: 209.190.122.186
+
+Q13. What is the unique environmental variable of PID 2464?
+how to respond: use the plugin windows.envars, which shows all environment variables for PID 2464 (PATH, TEMP, USERNAME, etc.). After analysis, there is an unusual variable OANOCACHE; we verify that this variable appears only for this PID:
+
+┌──(vol3env)─(kali㉿kali)-[~/Documents/theroom/forensics_thm/volatility3]
+└─$ python3 vol.py -f victim.raw windows.envars | grep -i "OANOCACHE" -n
+
+821:2464        wmpnetwk.exe    0x2a1df0        OANOCACHE       1
+Answer: OANOCACHE
+
+Conclusion:
+In this challenge room we learned about investigating memory forensics with Volatility and maximizing Linux bash usage (regex and other functions) to find specific information during analysis. The challenge wasn’t so much about the difficulty of finding answers, but rather about the technical configuration—how to download and set up Volatility—and the fact that the room was created some time ago, so we must adapt to current tools and versions.
