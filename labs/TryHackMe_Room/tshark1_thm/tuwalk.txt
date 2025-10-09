@@ -1,0 +1,223 @@
+Tshark1 Room THM Walkthrough
+
+This room presents you with a challenge to investigate some traffic data as a part of the SOC team. Let's start working with TShark to analyse the captured traffic. We recommend completing the TShark: The Basics and TShark: CLI Wireshark Features rooms first, which will teach you how to use the tool in depth. 
+
+Start the VM by pressing the green Start Machine button attached to this task. The machine will start in split view, so you don't need SSH or RDP. In case the machine does not appear, you can click the blue Show Split View button located at the top of this room.
+
+NOTE: Exercise files contain real examples. DO NOT interact with them outside of the given VM. Direct interaction with samples and their contents (files, domains, and IP addresses) outside the given VM can pose security threats to your machine. 
+
+An alert has been triggered: "The threat research team discovered a suspicious domain that could be a potential threat to the organisation."
+
+The case was assigned to you. Inspect the provided teamwork.pcap located in ~/Desktop/exercise-files and create artefacts for detection tooling.
+
+Your tools: TShark, VirusTotal.
+
+Investigate the contacted domains.
+Investigate the domains by using VirusTotal.
+According to VirusTotal, there is a domain marked as malicious/suspicious.
+
+-Q1 : What is the full URL of the malicious/suspicious domain address?
+Enter your answer in defanged format.
+How to Response? pertama gunakan tshark dengan struktur cli ini:
+tshark -r ~/Desktop/exercise-files/teamwork.pcap -Y "http.request" -T fields -e http.host -e http.request.uri
+
+kenapa kita gunakan ini! 
+Strukturnya:
+
+tshark → programnya (versi CLI dari Wireshark).
+
+-r ~/Desktop/exercise-files/teamwork.pcap → baca data dari file pcap ini, bukan dari jaringan langsung.
+
+-Y "http.request" → filter hanya paket yang merupakan HTTP request. Jadi yang keluar cuma permintaan dari client ke server (GET, POST, dll).
+
+-T fields → format output jadi bentuk kolom, bukan tampilan default TShark yang panjang.
+
+-e http.host → tampilkan kolom nama host HTTP (misalnya example.com).
+
+-e http.request.uri → tampilkan kolom path yang diminta (misalnya /index.html).
+📌 Hasil akhirnya → dua kolom:
+kolom pertama = host/domain tujuan
+kolom kedua = path yang diminta di server
+Kalau digabung, kita dapat full URL tujuan dari setiap HTTP request.
+
+setelah dapat kita akan gunakan defang format URL gunakan cyberchef untuk dapatkan hasilnya
+Answer: hxxp[://]www[.]paypal[.]com4uswebappsresetaccountrecovery[.]timeseaways[.]com
+
+
+-Q2 : When was the URL of the malicious/suspicious domain address first submitted to VirusTotal?
+How to Response? use the URL on virustotal : http://www.paypal.com4uswebappsresetaccountrecovery.timeseaways.com/
+
+and see on the Details menu disitu kita akan melihat di History
+First Submission
+Answer: 2017-04-17 22:52:53 UTC
+
+-Q3 : Which known service was the domain trying to impersonate?
+How to Response? setelah kita membaca struktur URL disitu tertera bahwa ada domain yang coba ditiru 
+Answer: PayPal
+
+-Q4 : What is the IP address of the malicious domain?
+Enter your answer in defanged format.
+How to Response? gunakan tshark dengan perintah: 
+tshark -r teamwork.pcap -Y 'dns && dns.qry.name == "www.paypal.com4uswebappsresetaccountrecovery.timeseaways.com"' -T fields -e dns.qry.name -e dns.a
+
+Strukturnya: 
+
+tshark → program untuk baca dan analisa file pcap lewat CLI.
+
+-r teamwork.pcap → baca file teamwork.pcap (bukan capture live).
+
+-Y 'dns && dns.qry.name == "...domain..."' → filter:
+
+hanya paket DNS (dns)
+
+dan nama domain (dns.qry.name) harus sama persis dengan domain yang kita cari.
+
+-T fields → output dibuat dalam bentuk kolom, bukan tampilan default.
+
+-e dns.qry.name → tampilkan kolom nama domain yang ditanyakan (query).
+
+-e dns.a → tampilkan kolom alamat IP (jawaban DNS untuk IPv4).
+
+defang IP Address di cyberchef
+Answer: 184[.]154[.]127[.]226
+
+-Q5 : What is the email address that was used?
+Enter your answer in defanged format. (format: aaa[at]bbb[.]ccc)
+
+berarti kita harus cari packet yang berisi email yang berjalan pada http POST dengan filter tshark berikut: 
+tshark -r teamwork.pcap -Y "http.request.method == POST && frame contains @" -T fields -e http.host -e http.request.uri -e frame.number
+
+Strukturnya: 
+tshark
+→ Versi CLI-nya Wireshark, buat baca file pcap atau sniff langsung.
+
+-r teamwork.pcap
+→ Baca file capture bernama teamwork.pcap (nggak live capture).
+
+-Y "http.request.method == POST && frame contains @"
+→ Filter display:
+
+http.request.method == POST → cuma ambil paket HTTP yang metode-nya POST.
+
+frame contains @ → cuma yang di dalam paketnya ada karakter @ (biasanya indikasi email atau user).
+
+&& → kedua kondisi itu harus benar.
+
+-T fields
+→ Output hanya field tertentu (bukan tampilan paket full).
+
+-e http.host
+→ Cetak nama host HTTP-nya.
+
+-e http.request.uri
+→ Cetak path/URL request-nya.
+
+-e frame.number
+→ Cetak nomor frame (posisi paket di pcap).
+
+📌 Jadi sederhananya:
+
+“Cari semua paket HTTP POST di teamwork.pcap yang mengandung @, lalu tampilkan: host tujuan, path yang diakses, dan nomor framenya.”
+
+kemudian kita menemukan alamat frame yang mengandung email di 202 dan 122
+
+selanjutnya kita akan tampilkan nilai frame yang didapatkan, pada frame 202 dengan akan ditemukan email yang bersangkutan yaitu
+gunakan ini untuk tampilkan value: 
+tshark -r teamwork.pcap -Y "frame.number == 202" -V
+
+fungsi -V : verbose output.
+Tanpa ini, tshark hanya menampilkan ringkasan per paket (satu baris).
+Dengan -V, dia memecah paket jadi detail per lapisan:
+Frame header (waktu, panjang data, dsb)
+Ethernet layer
+IP layer
+TCP/UDP layer
+Layer aplikasi (HTTP, SMTP, dll)
+
+ada bagian yang menampilkan email yaitu johnny5alive@gmail.com
+dan kita defang email menggunakan format (format: aaa[at]bbb[.]ccc)
+Answer: johnny5alive[at]gmail[.]com
+
+Kesimpulan: 
+File pcap ini berisi lalu lintas HTTP menuju sebuah domain yang jelas-jelas dibuat untuk meniru PayPal. Domain tersebut pertama kali dikirim ke VirusTotal pada 2017-04-17 dan mengarah ke 184[.]154[.]127[.]226.
+Penyerang melakukan exfiltrasi atau mengirimkan email (johnny5alive[at]gmail[.]com) melalui permintaan HTTP POST, yang mengindikasikan adanya pencurian kredensial atau data formulir.
+
+Langkah tindak lanjut yang bisa dilakukan tim SOC:
+- Buat aturan deteksi untuk domain berbahaya (termasuk versi defanged) dan untuk alamat IP tersebut.
+- Blokir domain/IP di lapisan DNS/proxy perimeter serta tambahkan signature YARA/IDS untuk pola URL yang sama persis.
+- Lakukan hunting untuk menemukan host internal lain yang mungkin pernah menghubungi IP atau domain tersebut, lalu isolasi jika diperlukan.
+- Gunakan riwayat submission di VirusTotal untuk memeriksa indikator terkait dan urutan waktunya.
+- Simpan file pcap dan buat laporan insiden untuk analisis malware/URL lebih lanjut di VM yang terisolasi.
+
+  English Ver:
+
+Quick intro:
+This room asks you to investigate network traffic as part of a SOC team using TShark. Start the VM (green Start Machine button) and open the capture file ~/Desktop/exercise-files/teamwork.pcap. Don’t interact with samples outside the provided VM — they’re real and may be dangerous.
+
+An alert triggered: “The threat research team discovered a suspicious domain that could be a potential threat to the organisation.”
+Your task: inspect the provided pcap and produce artifacts for detection tooling (domains, IPs, submission dates, related email, etc.). Tools used here: TShark and VirusTotal.
+
+How we search HTTP requests with TShark
+
+Run this TShark command to list hosts and request URIs from the pcap:
+tshark -r ~/Desktop/exercise-files/teamwork.pcap -Y "http.request" -T fields -e http.host -e http.request.uri
+
+Why this works (short & simple):
+
+tshark — CLI version of Wireshark.
+
+-r <file> — read capture file (not live).
+
+-Y "http.request" — show only HTTP request packets (GET/POST).
+
+-T fields — output specific fields in columns.
+
+-e http.host and -e http.request.uri — show destination host and requested path.
+Result = two columns (host | path). Combine them to get the full URL for each HTTP request.
+
+To defang a URL (safe for sharing), use CyberChef or manual replacement (e.g., http → hxxp, . → [.]).
+
+Q1 — What is the full URL of the malicious/suspicious domain address?
+
+How we found it: Run the TShark command above, identify suspicious host+URI, then defang the URL.
+Answer (defanged):
+hxxp[://]www[.]paypal[.]com4uswebappsresetaccountrecovery[.]timeseaways[.]com
+
+Note: the URL structure shows an attempt to impersonate PayPal by embedding paypal in the host/path.
+
+Q2 — When was the URL first submitted to VirusTotal?
+
+How we found it: Paste the URL (or the real URL) into VirusTotal, open the Details page and check the History / First Submission entry.
+Answer: 2017-04-17 22:52:53 UTC
+
+Q3 — Which known service was the domain trying to impersonate?
+
+How we found it: Read the URL/host structure; it contains paypal, indicating the impersonated brand.
+Answer: PayPal
+
+Q4 — What is the IP address of the malicious domain? (defanged format)
+
+How we found it: Query DNS records inside the pcap with TShark:
+tshark -r teamwork.pcap -Y 'dns && dns.qry.name == "www.paypal.com4uswebappsresetaccountrecovery.timeseaways.com"' -T fields -e dns.qry.name -e dns.a
+This lists the DNS query and the A record returned. Defang the IP for reporting.
+Answer (defanged): 184[.]154[.]127[.]226
+
+Q5 — What is the email address that was used? (defanged format: aaa[at]bbb[.]ccc)
+
+How we found it: Search for HTTP POST packets that contain @ (likely user/email data):
+tshark -r teamwork.pcap -Y "http.request.method == POST && frame contains @" -T fields -e http.host -e http.request.uri -e frame.number
+We found frames containing @ at frames 202 and 122. Show the full verbose frame for the frame with the email:
+tshark -r teamwork.pcap -Y "frame.number == 202" -V
+Inspect the HTTP body in that verbose output — the email appears there. Defang it.
+Answer (defanged): johnny5alive[at]gmail[.]com
+
+Conclusion:
+The pcap contains HTTP traffic to a domain clearly crafted to impersonate PayPal. The domain was first submitted to VirusTotal on 2017-04-17 and resolves to 184[.]154[.]127[.]226.
+The attacker exfiltrated or posted an email (johnny5alive[at]gmail[.]com) via an HTTP POST, suggesting credential or form-data capture.
+
+Actionable next steps for SOC:
+- Create detection rules for the malicious domain (and defanged variants) and for the IP address.
+- Block the domain/IP at perimeter DNS/proxy and add YARA/IDS signatures for this exact URL pattern.
+- Hunt for any other internal hosts contacting that IP or domain and isolate if necessary.
+- Use VirusTotal submission history to check for related indicators and timeline.
+- Preserve the pcap and report the incident for deeper malware/URL analysis in an isolated VM.
