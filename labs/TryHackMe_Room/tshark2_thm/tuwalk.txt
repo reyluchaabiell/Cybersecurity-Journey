@@ -1,0 +1,207 @@
+Tshark2 Room THM Walkthrough
+
+This room presents you with a challenge to investigate some traffic data as a part of the SOC team. Let's start working with TShark to analyse the captured traffic. We recommend completing the TShark: The Basics and TShark: CLI Wireshark Features rooms first, which will teach you how to use the tool in depth. 
+
+Start the VM by pressing the green Start Machine button in this task. The machine will start in split view, so you don't need SSH or RDP. In case the machine does not appear, you can click the blue Show Split View button located at the top of this room.
+
+NOTE: Exercise files contain real examples. DO NOT interact with them outside of the given VM. Direct interaction with samples and their contents (files, domains, and IP addresses) outside the given VM can pose security threats to your machine. 
+
+An alert has been triggered: "A user came across a poor file index, and their curiosity led to problems".
+
+The case was assigned to you. Inspect the provided directory-curiosity.pcap located in ~/Desktop/exercise-files and retrieve the artefacts to confirm that this alert is a true positive.
+
+Your tools: TShark, VirusTotal.
+
+Investigate the DNS queries.
+Investigate the domains by using VirusTotal.
+According to VirusTotal, there is a domain marked as malicious/suspicious.
+
+-Q1 : What is the name of the malicious/suspicious domain?
+Enter your answer in a defanged format.
+How to Response? we need to use tshark to filter the dns so we can use: tshark -r curiosity.pcap -Y "dns.qry.name" -T fields -e dns.qry.name | sort -u
+
+fungsi dari sort -u: mengurutkan secara alafabetis dan hasil tanpa duplikat
+
+jadi hasil domain yang didapatkan adalah: 
+api.bing.com
+iecvlist.microsoft.com
+isatap
+jx2-bavuong.com
+ocsp.digicert.com
+r20swj13mr.microsoft.com
+www.bing.com
+
+cek satu persatu di virustotal sampai anda temukan yang memiliki vendor yang malicious/suspicious
+salah satunya ialah yang sesuai setelah analisa jx2-bavuong.com
+dan kita defang dengan cyberchef
+Answer: jx2-bavuong[.]com
+
+-Q2 : What is the total number of HTTP requests sent to the malicious domain?
+How to Response? kita ingin tahu berapa kali request HTTP dari domain malicious yang tadi jx2-bavuong.com gunakan CLI Tshark: 
+tshark -r teamwork.pcap -Y 'http.host == "jx2-bavuong.com"' | wc -l
+
+Penjelasan fungsi singkat 
+http.host
+
+Ini adalah field di protokol HTTP yang berisi nama domain yang diminta.
+
+Misalnya saat browser akses http://jx2-bavuong.com/index.php, bagian Host: jx2-bavuong.com di header HTTP itu yang dimaksud.
+
+Jadi di filter tshark -Y 'http.host == "jx2-bavuong.com"', kita cuma ambil paket HTTP yang domainnya persis jx2-bavuong.com.
+
+wc -l
+
+wc = word count di Linux, dan opsi -l artinya menghitung jumlah baris.
+
+Karena setiap baris output tshark mewakili satu paket HTTP request, wc -l akan kasih tahu berapa banyak request yang cocok dengan filter tadi.
+
+anda akan temukan 
+Answer: 14
+
+-Q3 : What is the IP address associated with the malicious domain?
+Enter your answer in a defanged format.
+Saring dengan format cli: tshark -r directory-curiosity.pcap -Y 'dns.qry.type == 1' -T fields -e dns.a -e dns.qry.name | awk NF | sort -u | grep "jx2-bavuong.com"
+
+Struktur baru: 
+dns.qry.type == 1 : filter hanya paket DNS query tipe A (minta IP).
+awk NF : hapus baris kosong dari output supaya rapi.
+
+hasil kita defang dengan cyberchef
+Answer: 141[.]164[.]41[.]174
+
+-Q4 : What is the server info of the suspicious domain?
+How to Response jadinya kita hanya ingin menampilkan server apa yang digunakan dengan CLI: tshark -r directory-curiosity.pcap -T fields -e http.server | sort -u
+
+ini akan tampilkan server yang digunakan, yaitu
+Answer: Apache/2.2.11 (Win32) DAV/2 mod_ssl/2.2.11 OpenSSL/0.9.8i PHP/5.2.9
+
+-Q5 : Follow the "first TCP stream" in "ASCII".
+Investigate the output carefully.
+What is the number of listed files?
+How to Response? Kita ingin tahu listed yang terintegrasi pada sebuah file di first TCP stream in ASCII dengan gunakan:
+tshark -r directory-curiosity.pcap -z follow,tcp,ascii,0 -q
+
+dari hasil analisa listed yang mengandung file ada
+Answer: 3
+
+-Q6 : What is the filename of the first file?
+Enter your answer in a defanged format.
+How to Response? Jadi setelah hasil tcp stream ditampilkan kita ambil listed filename pertama dan defang 
+Answer: 123[.]php
+
+-Q7 : Export all HTTP traffic objects.
+What is the name of the downloaded executable file?
+Enter your answer in a defanged format.
+How to Response? Kita ingin tahu file yang didapat apabila kita Export all HTTP traffic objects, dengan CLI: 
+tshark -r directory-curiosity.pcap --export-objects http,./exported_files
+cek di folder exported_files
+disana kita lihat file yang dapat dieksekusi dengan nama vlauto.exe
+ubah dalam format defang
+Answer: vlauto[.]exe
+
+-Q8 : What is the SHA256 value of the malicious file?
+How to Response? file executeble tadi kita ubah menjadi hash value SHA256 dengan : sha256sum vlauto.exe
+Answer: b4851333efaf399889456f78eac0fd532e9d8791b23a86a19402c1164aed20de
+
+-Q9 : Search the SHA256 value of the file on VirtusTotal.
+What is the "PEiD packer" value?
+How to Response? Input hasil hash file di VT dan bukan halaman Details - dibagian Basic Properties tertera PEiD packer
+Answer: .NET executable
+
+-Q10 : Search the SHA256 value of the file on VirtusTotal.
+What does the "Lastline Sandbox" flag this as?
+How to Response? Cek pada halaman menu Behavior pada bagian Display grouped sandbox reports, gunakan hanya filter Lastline Sandbox, dan hasil akan muncul pada bagian Dynamic Analysis Sandbox Detections
+Answer: MALWARE TROJAN
+
+English Ver:
+🕵️‍♂️ TShark2 Room — THM Walkthrough
+
+This challenge puts you in the shoes of a SOC analyst investigating suspicious network traffic.
+You’ll use TShark to analyze a provided packet capture and confirm whether an alert is a true positive.
+
+👉 Tip: If you’re new to TShark, it’s highly recommended to finish the rooms “TShark: The Basics” and “TShark: CLI Wireshark Features” first. They’ll help you understand the tool in depth.
+
+⚙️ Setup
+
+Click the green “Start Machine” button.
+
+The VM opens in split-view, so no SSH/RDP needed.
+
+If it doesn’t show up, click the blue “Show Split View” button at the top.
+
+⚠️ Note: The exercise files use real samples. Do NOT interact with them outside the VM (e.g., don’t browse the domains or open the files locally) to avoid any risk to your machine.
+
+📜 Scenario
+
+An alert was raised:
+
+“A user stumbled on a bad file index, and curiosity led to trouble.”
+
+You’re tasked to investigate the capture file:
+~/Desktop/exercise-files/directory-curiosity.pcap
+
+Tools: TShark, VirusTotal.
+
+Your mission:
+
+Review DNS queries.
+
+Check the domains on VirusTotal.
+
+Identify if the alert is legitimate and gather evidence.
+
+📝 Investigation Summary
+🔎 Q1: Malicious Domain
+Filter DNS queries:
+tshark -r curiosity.pcap -Y "dns.qry.name" -T fields -e dns.qry.name | sort -u
+sort -u sorts alphabetically and removes duplicates.
+After checking each domain on VirusTotal, one was flagged as malicious:
+✅ Answer: jx2-bavuong[.]com
+
+🔎 Q2: Total HTTP Requests
+Count HTTP requests sent to the malicious domain:
+tshark -r teamwork.pcap -Y 'http.host == "jx2-bavuong.com"' | wc -l
+wc -l counts each request line.
+✅ Answer: 14
+
+🔎 Q3: Malicious IP Address
+Filter only A-record DNS responses:
+tshark -r directory-curiosity.pcap -Y 'dns.qry.type == 1' -T fields -e dns.a -e dns.qry.name | awk NF | sort -u | grep "jx2-bavuong.com"
+✅ Answer: 141[.]164[.]41[.]174
+
+🔎 Q4: Server Info
+tshark -r directory-curiosity.pcap -T fields -e http.server | sort -u
+✅ Answer: Apache/2.2.11 (Win32) DAV/2 mod_ssl/2.2.11 OpenSSL/0.9.8i PHP/5.2.9
+
+🔎 Q5: Listed Files in First TCP Stream
+tshark -r directory-curiosity.pcap -z follow,tcp,ascii,0 -q
+✅ Answer: 3
+
+🔎 Q6: First File Name
+First listed file (defanged):
+✅ Answer: 123[.]php
+
+🔎 Q7: Downloaded Executable
+Export all HTTP objects:
+tshark -r directory-curiosity.pcap --export-objects http,./exported_files
+Inside exported_files folder:
+✅ Answer: vlauto[.]exe
+
+🔎 Q8: SHA256 Hash of Malicious File
+sha256sum vlauto.exe
+✅ Answer: b4851333efaf399889456f78eac0fd532e9d8791b23a86a19402c1164aed20de
+
+🔎 Q9: PEiD Packer (VirusTotal → Details → Basic Properties)
+✅ Answer: .NET executable
+
+🔎 Q10: Lastline Sandbox Detection (VirusTotal → Behavior → Sandbox Reports → Lastline)
+✅ Answer: MALWARE TROJAN
+
+Conclusion:
+- TShark is a powerful CLI version of Wireshark for filtering, extracting, and following streams in packet captures.
+- Combining TShark filters with tools like VirusTotal speeds up malware-related network investigations.
+- Always use defanged formats when sharing suspicious domains or IPs to prevent accidental clicks.
+
+This walkthrough not only solves the room but also shows practical SOC workflows: DNS hunting, HTTP traffic analysis, file extraction, and malware verification.
+
+🚀 Pro-Tip: Practice these TShark filters often — mastering them can save precious time during real-world incident response.
