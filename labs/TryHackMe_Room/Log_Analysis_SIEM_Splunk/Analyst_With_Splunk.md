@@ -280,6 +280,9 @@ The logs for this task are located in the Splunk index task5. Use the following 
 Image Documentasition:
 ![Hasil Scan](task5_001.png)
 
+![Hasil Scan](task5_002.png)
+
+![Hasil Scan](task5_003.png)
 Answer the questions below
 
 What was the timestamp of the remote-ssh account creation?
@@ -342,6 +345,10 @@ The query looks for IPs that send >25 POST requests in 5 minutes.
 
 Web logs = CCTV cameras of the website world 🌐
 You can see who is trying to log in, who is sneaking in through malicious files, and who is attacking the server with flood traffic.
+
+Image Documentasition:
+![Hasil Scan](task6_00.png)
+
 
 Answer the questions below
 
