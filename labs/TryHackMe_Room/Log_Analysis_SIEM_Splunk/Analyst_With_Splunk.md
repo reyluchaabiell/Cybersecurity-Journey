@@ -198,17 +198,17 @@ function: This query helps analysts find malicious PowerShell that may be runnin
 Suspicious Network Connection
 index=winenv EventCode=3 ComputerName=WINHOST05
 | table _time ComputerName Image SourceIp SourcePort DestinationIp DestinationPort Protocol
-function: Query ini berguna buat melacak aktivitas jaringan dari host tertentu, misalnya buat tahu apakah WINHOST05 nyambung ke IP mencurigakan atau server C2 (Command & Control).
+function: This query is useful for tracking network activity from specific hosts, for example, to find out whether WINHOST05 is connected to a suspicious IP or C2 (Command & Control) server.
 
 Windows Security Logs
 index=winenv EventCode=4720 OR EventCode=4722
 | table _time EventCode ComputerName Subject_Account_Name Target_Account_Name New_Account_Account_Name Keywords
-function: Query ini membantu SOC Analyst menemukan akun baru atau akun lama yang diaktifkan kembali — langkah penting buat deteksi privilege escalation atau akun backdoor buatan attacker.
+function: This query helps SOC analysts find new accounts or old accounts that have been reactivated — an important step in detecting privilege escalation or backdoor accounts created by attackers.
 
 Windows System Logs
 index=winenv EventCode=7045 OR EventCode=7036 ComputerName=WINHOST05
 |  table _time EventCode ComputerName Service_Name Service_Account Service_File_Name Message
-function: Query ini membantu SOC Analyst mendeteksi service mencurigakan — misalnya service yang aneh, aktif tiba-tiba, atau pakai akun sistem tinggi.
+function: This query helps SOC analysts detect suspicious services—for example, services that are unusual, suddenly active, or use high-level system accounts.
 
 Practice Scenario
 You are an SOC Level 1 Analyst on shift and have received an alert indicating a suspicious network connection using port 5678 on the WIN-105 host. Your task is to conduct an investigation and determine whether this activity is suspicious.
