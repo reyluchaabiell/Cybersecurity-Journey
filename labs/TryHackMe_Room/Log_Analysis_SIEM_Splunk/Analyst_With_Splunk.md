@@ -216,6 +216,7 @@ You are an SOC Level 1 Analyst on shift and have received an alert indicating a 
 The logs for this task are located in the Splunk index task4. Use the following query: index=task4
 
 Image Documentasion:
+![Hasil Scan](task4_01.png)
 
 
 Answer the questions below
