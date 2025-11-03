@@ -277,6 +277,9 @@ Your task is to dive into the logs and determine exactly what happened on the sy
 
 The logs for this task are located in the Splunk index task5. Use the following query: index=task5
 
+Image Documentasition:
+![Hasil Scan](task5_001.png)
+
 Answer the questions below
 
 What was the timestamp of the remote-ssh account creation?
