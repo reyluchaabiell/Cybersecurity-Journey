@@ -218,6 +218,8 @@ The logs for this task are located in the Splunk index task4. Use the following 
 Image Documentasion:
 ![Hasil Scan](task4_01.png)
 
+![Hasil Scan](task4_02.png)
+
 
 Answer the questions below
 
