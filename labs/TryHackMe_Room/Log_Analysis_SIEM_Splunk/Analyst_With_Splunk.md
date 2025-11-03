@@ -215,6 +215,9 @@ You are an SOC Level 1 Analyst on shift and have received an alert indicating a 
 
 The logs for this task are located in the Splunk index task4. Use the following query: index=task4
 
+Image Documentasion:
+
+
 Answer the questions below
 
 Which IP address was the connection established with?
