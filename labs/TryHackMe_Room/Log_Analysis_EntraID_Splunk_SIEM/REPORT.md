@@ -257,3 +257,18 @@ This project demonstrates how **log analysis and SIEM tools can uncover attacker
 
 **IMAGE TIMELINE**
 
+![Attack Timeline1](timeline1.png)
+
+![Attack Timeline2](timeline2.png)
+
+![Attack Timeline3](timeline3.png)
+
+![Attack Timeline4](timeline4.png)
+
+![Attack Timeline5](timeline5.png)
+
+![Attack Timeline6](timeline6.png)
+
+![Attack Timeline7](timeline7.png)
+
+![Attack Timeline8](timeline8.png)
