@@ -255,4 +255,6 @@ By correlating multiple log sources, the full attack story became visible.
 This project demonstrates how **log analysis and SIEM tools can uncover attacker behavior and help security teams understand and respond to identity-based attacks in cloud environments**.
 
 
+**IMAGE TIMELINE**
 
+![Attack Timeline1](attack-timeline.png)
