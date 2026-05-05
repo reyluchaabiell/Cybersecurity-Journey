@@ -32,7 +32,7 @@ Recon -> Web Enumeration -> Camaleon CMS 2.9.0
 -> root shell
 ```
 
-![Room Detail](roomdetail.png)
+![Room Detail](assets/roomdetail.png)
 
 ---
 
