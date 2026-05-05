@@ -59,7 +59,7 @@ The HTTP service redirected by hostname, so the local hosts file was updated:
 echo "10.129.29.85 facts.htb" | sudo tee -a /etc/hosts
 ```
 
-![Nmap Scan](recon.png)
+![Nmap Scan](assets/recon.png)
 
 ### Web Discovery
 
@@ -80,17 +80,17 @@ Important discovery:
 /admin      -> http://facts.htb/admin/login
 ```
 
-![Directory Enumeration](enumeration.png)
+![Directory Enumeration](assets/enumeration.png)
 
 ### CMS Fingerprinting
 
 The admin panel revealed the application as **Camaleon CMS 2.9.0**. The version was visible in the CMS interface footer after login.
 
-![Admin Login](webdetail3.png)
+![Admin Login](assets/webdetail3.png)
 
-![Admin Dashboard](webdetail4.png)
+![Admin Dashboard](assets/webdetail4.png)
 
-![Camaleon CMS Version](webdetail.png)
+![Camaleon CMS Version](assets/webdetail.png)
 
 At this point, the machine moved from generic web enumeration into authenticated CMS testing. A normal low-privileged user account could be created and used to log in to the CMS dashboard with a `client` role.
 
@@ -149,7 +149,7 @@ python3 exploit.py \
 
 The `-e` flag extracted S3-related configuration, and the `-r` flag reverted the CMS role after extraction.
 
-![Exploit Execution](exploit2.png)
+![Exploit Execution](assets/exploit2.png)
 
 ### Why This Worked
 
@@ -180,7 +180,7 @@ S3 Secret Key: [REDACTED]
 S3 Endpoint:   [REDACTED]
 ```
 
-![S3 Configuration](inputkey.png)
+![S3 Configuration](assets/inputkey.png)
 
 The AWS CLI was configured with a dedicated profile:
 
@@ -220,7 +220,7 @@ Recovered passphrase:
 dragonballz
 ```
 
-![SSH Key Cracking](cracking.png)
+![SSH Key Cracking](assets/cracking.png)
 
 With the passphrase recovered, the SSH key permissions were corrected and SSH access was established as `trivia`:
 
@@ -260,7 +260,7 @@ cat user.txt
 
 The flag value is intentionally omitted from this public writeup.
 
-![User Flag](userflag.png)
+![User Flag](assets/userflag.png)
 
 This stage demonstrates an important lateral movement lesson: even without fully switching users, weak file permissions or group relationships may expose another user's sensitive files.
 
@@ -282,7 +282,7 @@ The key finding was permission to run `facter` as root:
 /usr/bin/facter
 ```
 
-![Privilege Escalation Discovery](previllage_escalation.png)
+![Privilege Escalation Discovery](assets/previllage_escalation.png)
 
 ### Deep Dive: Why the Facter Exploit Works
 
@@ -333,7 +333,7 @@ whoami
 # root
 ```
 
-![Root via Facter](rootflag.png)
+![Root via Facter](assets/rootflag.png)
 
 ### Root Flag
 
