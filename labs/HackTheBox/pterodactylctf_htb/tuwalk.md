@@ -13,7 +13,7 @@
 | OS | Linux |
 | Main themes | Web enumeration, virtual hosts, configuration exposure, credential analysis, password reuse, local privilege escalation |
 
-![Machine overview](assets/01_machine_overview.png)
+![Machine overview](assets/machine_overview.png)
 
 This machine is a good example of a realistic CTF chain. It starts like a normal website investigation, then slowly turns into a deeper system review. A simple analogy is inspecting a building: first we look at the front doors, then we find different nameplates on the same building, then we discover a back office, and finally we review internal notes that point to a maintenance issue.
 
