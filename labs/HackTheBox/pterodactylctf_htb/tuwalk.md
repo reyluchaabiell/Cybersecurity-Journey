@@ -42,7 +42,7 @@ The most important lesson is that the machine was not solved by one single trick
 ## 🐾 Phase 1: Reconnaissance & Enumeration
 This phase is about mapping the "attack surface" before touching the target.
 
-![Machine overview](assets/machine_overview.png)
+![Machine overview](assets/04_network_recon.png)
 * **Initial Port Scanning:** The scan showed a very small external surface: SSH (22) and HTTP (80). As practitioners, we know SSH is usually for later once we have credentials, so we focus on HTTP first.
 
 ![Machine overview](assets/machine_overview.png)
