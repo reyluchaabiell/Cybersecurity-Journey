@@ -90,7 +90,7 @@ Web access is usually limited. Our goal now is to become a full system user.
 * **Password Reuse:** One recovered password was reused for SSH access by a local lab user. 
 * **Lesson:** Password reuse turns one small leak into a total system breach.
 
-![Machine overview](assets/cracking.png)
+![Machine overview](assets/userflag.png)
 * **Result:** SSH access obtained; User Flag collected.
 
 ---
