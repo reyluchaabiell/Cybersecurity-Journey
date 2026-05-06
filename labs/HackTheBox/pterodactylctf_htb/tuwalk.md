@@ -108,7 +108,7 @@ The final step: Taking total control of the Linux machine.
     2.  **CVE-2025-6019:** Affects `udisks/libblockdev`, allowing a user to gain elevated privileges.
 * **Analogy:** The first weakness tricks the badge reader into thinking you're at the front desk. The second weakness lets that "active" status open the maintenance elevator to the roof.
  
-![Machine overview](assets/machine_overview.png)
+![Machine overview](assets/20_root_access_proof_redacted.png)
 * **Root Execution:** By chaining these, we successfully gained **Root** access and completed the lab.
 
 ---
