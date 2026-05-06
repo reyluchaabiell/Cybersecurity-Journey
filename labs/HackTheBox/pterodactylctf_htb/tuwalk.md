@@ -52,7 +52,7 @@ This phase is about mapping the "attack surface" before touching the target.
 * **Virtual Host Discovery:** The application uses virtual host routing, meaning one IP serves different sites based on the requested hostname.
 * **Analogy:** Imagine one office building. The address is the same, but the receptionist sends you to different rooms depending on the company name you ask for.
 
-![Machine overview](assets/02_web_landing_monitorland.png)
+![Machine overview](assets/03_panel_login.png)
 * **Pterodactyl**, a game server management panel.
 * By "fuzzing" hostnames, we discovered the administrative panel interface.
 
@@ -63,11 +63,11 @@ This phase is about mapping the "attack surface" before touching the target.
 ## 🔓 Phase 2: Gaining Initial Access
 Here, we turn information into a way inside the system.
 
-![Machine overview](assets/06_locale_endpoint_validation_redacted.png)
-* **Endpoint Validation:** A "locale" (language) endpoint was found that could be reached without logging in.
-
 ![Machine overview](assets/07_cve_2025_49132_reference.png)
 * **CVE-2025-49132 Exploitation:** The behavior matched a known vulnerability where affected versions expose sensitive information through the locale mechanism.
+
+![Machine overview](assets/06_locale_endpoint_validation_redacted.png)
+* **Endpoint Validation:** A "locale" (language) endpoint was found that could be reached without logging in.
 
 ![Machine overview](assets/07_cve_2025_49132_reference.png)
 * **Configuration Exposure:** Configuration files are like an "instruction manual" for an application. Through this leak, we obtained the **Application Key** and **Database Credentials**.
