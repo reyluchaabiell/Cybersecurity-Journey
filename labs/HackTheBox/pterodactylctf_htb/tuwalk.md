@@ -48,7 +48,7 @@ This phase is about mapping the "attack surface" before touching the target.
 ![Machine overview](assets/02_web_landing_monitorland.png)
 * **Web Investigation:** The web service reveals a Minecraft-themed landing page called "MonitorLand". In CTFs, themes are hints; this points toward **Pterodactyl**, a game server management panel.
 
-![Machine overview](assets/machine_overview.png)
+![Machine overview](assets/05_virtual_host_discovery.png)
 * **Virtual Host Discovery:** The application uses virtual host routing, meaning one IP serves different sites based on the requested hostname.
     * **Analogy:** Imagine one office building. The address is the same, but the receptionist sends you to different rooms depending on the company name you ask for.
     * By "fuzzing" hostnames, we discovered the administrative panel interface.
