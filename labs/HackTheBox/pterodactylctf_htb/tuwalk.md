@@ -83,7 +83,7 @@ Web access is usually limited. Our goal now is to become a full system user.
 ![Machine overview](assets/12_database_table_overview.png)
 * **Database Enumeration:** With the database password from Phase 2, we reviewed the local tables, specifically the `users` table containing password hashes.
 
-![Machine overview](assets/machine_overview.png)
+![Machine overview](assets/environment_review_redacted.png)
 * **Credential Analysis and The Hash Concept:** A password hash is like a locked box. It isn't the password, but if the lock is weak, we can "crack" it to see what's inside.
 
 ![Machine overview](assets/machine_overview.png)
