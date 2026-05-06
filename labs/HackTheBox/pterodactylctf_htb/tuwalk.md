@@ -46,12 +46,15 @@ This phase is about mapping the "attack surface" before touching the target.
 * **Initial Port Scanning:** The scan showed a very small external surface: SSH (22) and HTTP (80). As practitioners, we know SSH is usually for later once we have credentials, so we focus on HTTP first.
 
 ![Machine overview](assets/02_web_landing_monitorland.png)
-* **Web Investigation:** The web service reveals a Minecraft-themed landing page called "MonitorLand". In CTFs, themes are hints; this points toward **Pterodactyl**, a game server management panel.
+* **Web Investigation:** The web service reveals a Minecraft-themed landing page called "MonitorLand". In CTFs, themes are hints; this points toward
 
 ![Machine overview](assets/05_virtual_host_discovery.png)
 * **Virtual Host Discovery:** The application uses virtual host routing, meaning one IP serves different sites based on the requested hostname.
-    * **Analogy:** Imagine one office building. The address is the same, but the receptionist sends you to different rooms depending on the company name you ask for.
-    * By "fuzzing" hostnames, we discovered the administrative panel interface.
+* **Analogy:** Imagine one office building. The address is the same, but the receptionist sends you to different rooms depending on the company name you ask for.
+
+![Machine overview](assets/02_web_landing_monitorland.png)
+* **Pterodactyl**, a game server management panel.
+* By "fuzzing" hostnames, we discovered the administrative panel interface.
 
 
 
@@ -66,7 +69,7 @@ Here, we turn information into a way inside the system.
 ![Machine overview](assets/07_cve_2025_49132_reference.png)
 * **CVE-2025-49132 Exploitation:** The behavior matched a known vulnerability where affected versions expose sensitive information through the locale mechanism.
 
-
+![Machine overview](assets/07_cve_2025_49132_reference.png)
 * **Configuration Exposure:** Configuration files are like an "instruction manual" for an application. Through this leak, we obtained the **Application Key** and **Database Credentials**.
 
 ![Machine overview](assets/machine_overview.png)
