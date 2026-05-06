@@ -69,7 +69,7 @@ Here, we turn information into a way inside the system.
 ![Machine overview](assets/06_locale_endpoint_validation_redacted.png)
 * **Endpoint Validation:** A "locale" (language) endpoint was found that could be reached without logging in.
 
-![Machine overview](assets/07_cve_2025_49132_reference.png)
+![Machine overview](assets/08_app_config_disclosure_redacted.png)
 * **Configuration Exposure:** Configuration files are like an "instruction manual" for an application. Through this leak, we obtained the **Application Key** and **Database Credentials**.
 
 ![Machine overview](assets/machine_overview.png)
