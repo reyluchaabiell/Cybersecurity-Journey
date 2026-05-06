@@ -86,9 +86,11 @@ Web access is usually limited. Our goal now is to become a full system user.
 ![Machine overview](assets/environment_review_redacted.png)
 * **Credential Analysis and The Hash Concept:** A password hash is like a locked box. It isn't the password, but if the lock is weak, we can "crack" it to see what's inside.
 
-![Machine overview](assets/machine_overview.png)
+![Machine overview](assets/cracking.png)
 * **Password Reuse:** One recovered password was reused for SSH access by a local lab user. 
 * **Lesson:** Password reuse turns one small leak into a total system breach.
+
+![Machine overview](assets/cracking.png)
 * **Result:** SSH access obtained; User Flag collected.
 
 ---
