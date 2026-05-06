@@ -72,7 +72,7 @@ Here, we turn information into a way inside the system.
 ![Machine overview](assets/08_app_config_disclosure_redacted.png)
 * **Configuration Exposure:** Configuration files are like an "instruction manual" for an application. Through this leak, we obtained the **Application Key** and **Database Credentials**.
 
-![Machine overview](assets/machine_overview.png)
+![Machine overview](assets/10_interactive_shell_evidence.png)
 * **Initial Lab Access:** Using these secrets, we obtained an interactive shell as the web service user. We are now inside the building in a restricted staff area.
 
 ---
