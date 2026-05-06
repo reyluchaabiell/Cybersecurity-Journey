@@ -80,7 +80,7 @@ Here, we turn information into a way inside the system.
 ## 🕵️ Phase 3: Lateral Movement & User Escalation
 Web access is usually limited. Our goal now is to become a full system user.
 
-![Machine overview](assets/machine_overview.png)
+![Machine overview](assets/12_database_table_overview.png)
 * **Database Enumeration:** With the database password from Phase 2, we reviewed the local tables, specifically the `users` table containing password hashes.
 
 ![Machine overview](assets/machine_overview.png)
@@ -88,7 +88,7 @@ Web access is usually limited. Our goal now is to become a full system user.
 
 ![Machine overview](assets/machine_overview.png)
 * **Password Reuse:** One recovered password was reused for SSH access by a local lab user. 
-    * **Lesson:** Password reuse turns one small leak into a total system breach.
+* **Lesson:** Password reuse turns one small leak into a total system breach.
 * **Result:** SSH access obtained; User Flag collected.
 
 ---
