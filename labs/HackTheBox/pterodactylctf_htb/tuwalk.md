@@ -173,8 +173,6 @@ With the application context understood, the local database was reviewed. The ta
 
 The users table showed accounts and password hashes. Full hashes are redacted.
 
-![Users table redacted](assets/13_users_table_redacted.png)
-
 This step teaches an important real-world risk: even if passwords are hashed, account data exposure is still dangerous. Hashes can sometimes be tested offline, especially if users choose weak or reused passwords.
 
 Think of a password hash as a locked box. It is not the password itself, but if the lock is weak and the attacker has enough time, they may be able to identify what password produced it.
