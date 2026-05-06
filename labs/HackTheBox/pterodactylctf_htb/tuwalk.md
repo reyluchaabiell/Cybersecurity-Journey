@@ -20,9 +20,9 @@ This machine is a good example of a realistic CTF chain. It starts like a normal
 ## High-Level Attack Path
 
 ```text
-Network recon
+  -> Network recon
   -> Web service discovered
-  -> Virtual host routing identified
+  -> Virtual Host Fuzzing
   -> Pterodactyl Panel discovered
   -> Locale endpoint reviewed
   -> Application configuration exposure validated
@@ -39,216 +39,63 @@ The most important lesson is that the machine was not solved by one single trick
 
 ---
 
-# 1. Initial Reconnaissance
+## 🐾 Phase 1: Reconnaissance & Enumeration
+This phase is about mapping the "attack surface" before touching the target.
 
-The first step was to understand what services were exposed by the target. The scan showed a very small external attack surface: mainly SSH and HTTP.
+* **Initial Port Scanning:** The scan showed a very small external surface: SSH (22) and HTTP (80). As practitioners, we know SSH is usually for later once we have credentials, so we focus on HTTP first.
+* **Web Investigation:** The web service reveals a Minecraft-themed landing page called "MonitorLand". In CTFs, themes are hints; this points toward **Pterodactyl**, a game server management panel.
+* **Virtual Host Discovery:** The application uses virtual host routing, meaning one IP serves different sites based on the requested hostname.
+    * **Analogy:** Imagine one office building. The address is the same, but the receptionist sends you to different rooms depending on the company name you ask for.
+    * By "fuzzing" hostnames, we discovered the administrative panel interface.
 
-![Network recon](assets/04_network_recon.png)
 
-From a practitioner mindset, this result tells us two things:
-
-1. SSH is usually useful later, after valid credentials are found.
-2. HTTP should be investigated first because web applications often reveal names, routes, redirects, technologies, or user-facing clues.
-
-Think of this like arriving at a building and seeing only two visible doors: a public reception door and a locked staff entrance. Since we do not have staff credentials yet, we start with reception.
 
 ---
 
-# 2. Web Application Review
+## 🔓 Phase 2: Gaining Initial Access
+Here, we turn information into a way inside the system.
 
-Opening the web service revealed a Minecraft-themed landing page called MonitorLand.
-
-![MonitorLand page](assets/02_web_landing_monitorland.png)
-
-This page was useful because it confirmed that the machine was related to game server hosting. That context matters. In CTFs, names and themes are often intentional hints. Here, the theme pointed toward Pterodactyl, a game server management panel.
-
-A separate login page was later identified for the Pterodactyl Panel.
-
-![Panel login](assets/03_panel_login.png)
-
-At this stage, the correct mindset is not to brute force the login page. A professional approach is to understand what software is running, how it is exposed, and whether there are public advisories that match the observed behavior.
+* **Endpoint Validation:** A "locale" (language) endpoint was found that could be reached without logging in.
+* **CVE-2025-49132 Exploitation:** The behavior matched a known vulnerability where affected versions expose sensitive information through the locale mechanism.
+* **Configuration Exposure:** Configuration files are like an "instruction manual" for an application. Through this leak, we obtained the **Application Key** and **Database Credentials**.
+* **Initial Lab Access:** Using these secrets, we obtained an interactive shell as the web service user. We are now inside the building in a restricted staff area.
 
 ---
 
-# 3. Virtual Host Discovery
+## 🕵️ Phase 3: Lateral Movement & User Escalation
+Web access is usually limited. Our goal now is to become a full system user.
 
-The application used virtual host routing. This means the same IP address can serve different websites depending on the hostname in the request.
-
-A daily-life analogy: imagine one office building with several companies inside. The street address is the same, but the receptionist sends you to different rooms depending on the company name you ask for.
-
-Virtual host fuzzing identified an additional host: the panel interface.
-
-![Virtual host discovery](assets/05_virtual_host_discovery.png)
-
-This was a key checkpoint because administrative interfaces are often separated from public-facing pages. The discovery of the panel gave the investigation a focused direction.
+* **Database Enumeration:** With the database password from Phase 2, we reviewed the local tables, specifically the `users` table containing password hashes.
+* **Credential Analysis:** * **The Hash Concept:** A password hash is like a locked box. It isn't the password, but if the lock is weak, we can "crack" it to see what's inside.
+* **Password Reuse:** One recovered password was reused for SSH access by a local lab user. 
+    * **Lesson:** Password reuse turns one small leak into a total system breach.
+* **Result:** SSH access obtained; User Flag collected.
 
 ---
 
-# 4. Endpoint Validation
+## 👑 Phase 4: Privilege Escalation (Root)
+The final step: Taking total control of the Linux machine.
 
-The next step was to review a locale-related endpoint exposed by the Pterodactyl Panel.
-
-![Locale endpoint validation](assets/06_locale_endpoint_validation_redacted.png)
-
-The response confirmed that the endpoint was reachable and handled by the application. Cookies and tokens were visible in the original response, but they are redacted in this report.
-
-The important learning point is not the token value. The important point is the behavior:
-
-- the endpoint was available without logging in;
-- it returned application-controlled content;
-- it matched the area described in public vulnerability information.
-
-This is how a responsible CTF practitioner validates a lead: match the machine behavior with the vulnerability description before relying on any proof-of-concept.
+* **The Mail Clue:** Local enumeration revealed an internal email mentioning unusual activity with `udisksd`. In CTFs, internal notes are rarely accidental; they are breadcrumbs.
+* **Vulnerability Research:** The clue pointed to two specific vulnerabilities:
+    1.  **CVE-2025-6018:** Affects how the system treats a user's active session.
+    2.  **CVE-2025-6019:** Affects `udisks/libblockdev`, allowing a user to gain elevated privileges.
+    * **Analogy:** The first weakness tricks the badge reader into thinking you're at the front desk. The second weakness lets that "active" status open the maintenance elevator to the roof.
+* **Root Execution:** By chaining these, we successfully gained **Root** access and completed the lab.
 
 ---
 
-# 5. Public Vulnerability Research
-
-The Pterodactyl Panel behavior matched CVE-2025-49132. Public vulnerability descriptions indicated that affected versions could expose sensitive application information through the locale mechanism.
-
-![CVE-2025-49132 reference](assets/07_cve_2025_49132_reference.png)
-
-The key concept is **configuration exposure**. Configuration files are like the instruction manual for an application. If that manual accidentally becomes readable, it may reveal where the database is, which credentials are used, and how the application signs or encrypts sensitive data.
-
----
-
-# 6. Configuration Exposure Validation
-
-The application configuration was reviewed in the lab. Sensitive values such as the application key are redacted below.
-
-![Application config disclosure](assets/08_app_config_disclosure_redacted.png)
-
-The database configuration was also exposed. The password and other sensitive parts are redacted.
-
-![Database config disclosure](assets/09_database_config_disclosure_redacted.png)
-
-This is the first major turning point of the machine.
-
-The lesson is simple: when an application leaks configuration, it may leak the keys to other internal doors. The database itself was not exposed directly to the internet, but the leaked configuration became useful after gaining access inside the lab system.
-
----
-
-# 7. Initial Lab Access for Deeper Enumeration
-
-After validating the issue, lab access was obtained for deeper enumeration. The screenshot below shows an interactive shell context as the web service user.
-
-![Interactive shell evidence](assets/10_interactive_shell_evidence.png)
-
-At this stage, the goal is not to rush. A web service shell is usually limited. The best practice is to enumerate carefully:
-
-- current user;
-- current directory;
-- application files;
-- local configuration;
-- available services;
-- possible user accounts;
-- logs or local messages.
-
-In simple terms, we moved from standing outside the building to being inside a restricted office. Now the job is to read signs, drawers, and internal notes carefully without assuming anything.
-
----
-
-# 8. Application Directory Review
-
-Inside the application directory, the environment file confirmed the same type of sensitive configuration exposure. Values are redacted in this report.
-
-![Environment review](assets/environment_review_redacted.png)
-
-This confirmed the root cause: sensitive secrets were accessible from the application context. From a defensive perspective, this is serious because application secrets often enable follow-on access.
-
-Important security lessons:
-
-- secrets should not be exposed through application endpoints;
-- application keys and database passwords should be rotated after exposure;
-- web service users should have the minimum required file access;
-- secrets should be monitored and protected like production credentials.
-
----
-
-# 9. Database Enumeration
-
-With the application context understood, the local database was reviewed. The table overview showed several areas of interest, including user accounts, sessions, API-related data, and recovery data.
-
-![Database table overview](assets/12_database_table_overview.png)
-
-The users table showed accounts and password hashes. Full hashes are redacted.
-
-This step teaches an important real-world risk: even if passwords are hashed, account data exposure is still dangerous. Hashes can sometimes be tested offline, especially if users choose weak or reused passwords.
-
-Think of a password hash as a locked box. It is not the password itself, but if the lock is weak and the attacker has enough time, they may be able to identify what password produced it.
-
----
-
-# 10. Credential Analysis and SSH Access
-
-One recovered password was found to be reused for SSH access to a lab user. The recovered value is not shown here.
-
-![Password recovery redacted](assets/14_password_recovery_redacted.png)
-
-This is another major lesson from the machine: **password reuse turns one exposure into another access path**.
-
-After SSH access was obtained, the user-level proof was collected. The flag is redacted.
-
-![User access proof](assets/15_user_access_proof_redacted.png)
-
-Professional takeaway:
-
-- never reuse application passwords for system accounts;
-- enforce password hygiene;
-- monitor exposed hashes as a serious incident;
-- rotate credentials after a configuration leak.
-
----
-
-# 11. Local Enumeration and the Mail Clue
-
-After user access, local enumeration revealed an internal mail message referencing unusual `udisksd` activity.
-
-![Local mail clue](assets/16_local_mail_clue.png)
-
-This was not random. In CTFs, local mail, notes, scripts, and unusual file names often act as clues. The message pointed toward a local privilege escalation path involving udisks/libblockdev behavior.
-
-A good practitioner does not blindly run tools after seeing a clue. The better approach is:
-
-1. identify the clue;
-2. form a hypothesis;
-3. research the related component;
-4. validate whether the system matches the vulnerability conditions;
-5. proceed only inside the authorized lab scope.
-
----
-
-# 12. Privilege Escalation Research
-
-The clue aligned with public information about CVE-2025-6018 and CVE-2025-6019.
-
-![CVE-2025-6018 reference](assets/17_cve_2025_6018_reference.png)
-
-CVE-2025-6018 relates to session and policy behavior. In simple terms, it can affect whether the system treats a user as having a kind of locally active session.
-
-![CVE-2025-6019 reference](assets/18_cve_2025_6019_reference.png)
-
-CVE-2025-6019 relates to udisks/libblockdev behavior. In simple terms, the storage-management component can be influenced in a way that leads to elevated privileges under the right conditions.
-
-The chain matters: one issue helps create the right session/policy condition, and the other issue uses that condition to reach a stronger privilege level.
-
-A simple analogy: one weakness makes the badge reader believe the user is standing at the front desk, while the second weakness allows that badge state to access a maintenance elevator.
-
----
-
-# 13. Privilege Escalation Validation
-
-The privilege escalation path was validated inside the HTB lab. Sensitive command-line values are redacted in the screenshot.
-
-![Privilege validation redacted](assets/19_privilege_validation_redacted.png)
-
-Successful validation resulted in root-level access in the lab environment.
-
-![Root access proof](assets/20_root_access_proof_redacted.png)
-
-The root flag value is not shown. The purpose of the screenshot is only to document that the lab objective was completed.
-
----
+## 🛡️ Phase 5: Defensive Lessons (Blue Team Mindset)
+Every offensive step provides a lesson for a defender.
+
+| Finding | Defensive Recommendation |
+| :--- | :--- |
+| Virtual hosts exposed | Inventory all hostnames and hide admin interfaces. |
+| Locale endpoint leak | Patch software immediately and validate input paths. |
+| Config leak (Secrets) | Rotate application keys and DB passwords after any exposure. |
+| Password reuse | Enforce unique credentials and Multi-Factor Authentication (MFA). |
+| Local mail hints | Do not leave sensitive operational clues in plain text. |
+| `udisks` Privilege Escalation | Apply system patches and restrict risky local permissions. |
 
 # 14. Defensive Lessons Learned
 
