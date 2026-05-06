@@ -45,7 +45,7 @@ This phase is about mapping the "attack surface" before touching the target.
 ![Machine overview](assets/04_network_recon.png)
 * **Initial Port Scanning:** The scan showed a very small external surface: SSH (22) and HTTP (80). As practitioners, we know SSH is usually for later once we have credentials, so we focus on HTTP first.
 
-![Machine overview](assets/machine_overview.png)
+![Machine overview](assets/02_web_landing_monitorland.png)
 * **Web Investigation:** The web service reveals a Minecraft-themed landing page called "MonitorLand". In CTFs, themes are hints; this points toward **Pterodactyl**, a game server management panel.
 
 ![Machine overview](assets/machine_overview.png)
