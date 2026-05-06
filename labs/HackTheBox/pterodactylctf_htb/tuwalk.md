@@ -152,7 +152,7 @@ In simple terms, we moved from standing outside the building to being inside a r
 
 Inside the application directory, the environment file confirmed the same type of sensitive configuration exposure. Values are redacted in this report.
 
-![Environment review](assets/11_environment_review_redacted.png)
+![Environment review](assets/environment_review_redacted.png)
 
 This confirmed the root cause: sensitive secrets were accessible from the application context. From a defensive perspective, this is serious because application secrets often enable follow-on access.
 
