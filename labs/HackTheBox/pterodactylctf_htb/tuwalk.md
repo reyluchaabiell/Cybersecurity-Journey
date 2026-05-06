@@ -60,7 +60,7 @@ This phase is about mapping the "attack surface" before touching the target.
 ## 🔓 Phase 2: Gaining Initial Access
 Here, we turn information into a way inside the system.
 
-![Machine overview](assets/machine_overview.png)
+![Machine overview](assets/06_locale_endpoint_validation_redacted.png)
 * **Endpoint Validation:** A "locale" (language) endpoint was found that could be reached without logging in.
 
 ![Machine overview](assets/machine_overview.png)
