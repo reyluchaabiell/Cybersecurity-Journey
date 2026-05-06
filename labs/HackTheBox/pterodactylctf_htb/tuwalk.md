@@ -98,14 +98,15 @@ Web access is usually limited. Our goal now is to become a full system user.
 ## 👑 Phase 4: Privilege Escalation (Root)
 The final step: Taking total control of the Linux machine.
 
-![Machine overview](assets/machine_overview.png)
+![Machine overview](assets/mailclue.png)
 * **The Mail Clue:** Local enumeration revealed an internal email mentioning unusual activity with `udisksd`. In CTFs, internal notes are rarely accidental; they are breadcrumbs.
 
+![Machine overview](assets/machine_overview.png)
 ![Machine overview](assets/machine_overview.png)
 * **Vulnerability Research:** The clue pointed to two specific vulnerabilities:
     1.  **CVE-2025-6018:** Affects how the system treats a user's active session.
     2.  **CVE-2025-6019:** Affects `udisks/libblockdev`, allowing a user to gain elevated privileges.
-    * **Analogy:** The first weakness tricks the badge reader into thinking you're at the front desk. The second weakness lets that "active" status open the maintenance elevator to the roof.
+* **Analogy:** The first weakness tricks the badge reader into thinking you're at the front desk. The second weakness lets that "active" status open the maintenance elevator to the roof.
  
 ![Machine overview](assets/machine_overview.png)
 * **Root Execution:** By chaining these, we successfully gained **Root** access and completed the lab.
