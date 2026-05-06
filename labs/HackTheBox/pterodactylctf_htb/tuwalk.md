@@ -63,7 +63,7 @@ Here, we turn information into a way inside the system.
 ![Machine overview](assets/06_locale_endpoint_validation_redacted.png)
 * **Endpoint Validation:** A "locale" (language) endpoint was found that could be reached without logging in.
 
-![Machine overview](assets/machine_overview.png)
+![Machine overview](assets/07_cve_2025_49132_reference.png)
 * **CVE-2025-49132 Exploitation:** The behavior matched a known vulnerability where affected versions expose sensitive information through the locale mechanism.
 
 
