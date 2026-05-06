@@ -102,7 +102,7 @@ The final step: Taking total control of the Linux machine.
 * **The Mail Clue:** Local enumeration revealed an internal email mentioning unusual activity with `udisksd`. In CTFs, internal notes are rarely accidental; they are breadcrumbs.
 
 ![Machine overview](assets/18_cve_2025_6018_reference.png)
-![Machine overview](assets/19_cve_2025_6019_reference.png)
+![Machine overview](assets/17_cve_2025_6019_reference.png)
 * **Vulnerability Research:** The clue pointed to two specific vulnerabilities:
     1.  **CVE-2025-6018:** Affects how the system treats a user's active session.
     2.  **CVE-2025-6019:** Affects `udisks/libblockdev`, allowing a user to gain elevated privileges.
