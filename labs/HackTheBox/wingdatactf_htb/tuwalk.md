@@ -375,11 +375,6 @@ The output showed that `wacky` could run a Python restore script as root without
 ```text
 (root) NOPASSWD: /usr/local/bin/python3 /opt/backup_clients/restore_backup_clients.py *
 ```
-
-This was the key privilege escalation path.
-
-![Privilege Escalation Clue](asset/clue2.png)
-
 The script was reviewed:
 
 ```bash
