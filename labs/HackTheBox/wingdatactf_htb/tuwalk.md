@@ -528,8 +528,6 @@ sudo /usr/local/bin/python3 /opt/backup_clients/restore_backup_clients.py \
   -r restore_poc
 ```
 
-![Crafted Tar PoC](asset/PoCtar.png)
-
 After the sudoers file was written, `wacky` could start a root shell:
 
 ```bash
@@ -538,8 +536,6 @@ whoami
 id
 cat /root/root.txt
 ```
-
-![Root Shell](asset/SSHKEY.png)
 
 > The actual root flag value is intentionally omitted from this public portfolio version.
 
