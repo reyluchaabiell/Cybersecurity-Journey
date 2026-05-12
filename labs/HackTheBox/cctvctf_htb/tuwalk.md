@@ -206,7 +206,7 @@ opensesame
 ## SSH Screenshot
 
 
-![Nmap Scan](assets/POSTEXPLOITENUMERATION.png)
+![Nmap Scan](assets/INITIALACCESS.png)
 
 
 Once inside, normal enumeration began.
@@ -310,7 +310,7 @@ python3 exploit.py revshell \
 ## Reverse Shell Screenshot
 
 
-![Initial](assets/INITIALACCESS.png)
+![Initial](assets/EXPLOIT.png)
 
 
 Seconds later, the listener caught a shell.
