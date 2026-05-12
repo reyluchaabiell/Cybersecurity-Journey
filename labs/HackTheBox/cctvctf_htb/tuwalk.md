@@ -142,7 +142,7 @@ python3 exploit.py \
 ## SQLi Exploit Screenshot
 
 
-![SQLi Exploit POC](assets/CREDENTIALREUSE.png)
+![SQLi Exploit POC](assets/RUNPOC.png)
 
 
 Eventually, the database spilled its secrets.
@@ -155,8 +155,8 @@ The dumped credentials contained bcrypt password hashes.
 
 ## Hash Dump Screenshot
 
-```text
-![Nmap Scan](images/nmap.png)
+
+![Dump Process](assets/CREDENTIALREUSE.png)
 ```
 
 Hashcat became the next forensic tool.
@@ -169,9 +169,9 @@ hashcat -m 3200 <HASHFILE> <WORDLIST>
 
 ## Hashcat Screenshot
 
-```text
-![Nmap Scan](images/nmap.png)
-```
+
+![Hashcat](assets/CRACKBCRYPT.png)
+
 
 The password cracked successfully:
 
@@ -205,9 +205,9 @@ opensesame
 
 ## SSH Screenshot
 
-```text
-![Nmap Scan](images/nmap.png)
-```
+
+![Nmap Scan](assets/POSTEXPLOITENUMERATION.png)
+
 
 Once inside, normal enumeration began.
 
@@ -234,7 +234,7 @@ Further inspection revealed the service had strong privileges and referenced con
 ## motionEye Enumeration Screenshot
 
 
-![Enumeration](assets/POSTEXPLOITENUMERATION.png)
+![Enumeration](assets/CREDENTIAL.png)
 
 Inside the configuration files, motionEye credentials were discovered.
 
