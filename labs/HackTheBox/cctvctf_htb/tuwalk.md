@@ -13,6 +13,9 @@
 
 ---
 
+![Machine Detail](assets/MACHINEDETAIL.png)
+
+
 # The Brief
 
 Some HackTheBox machines feel like smashing a locked door with a hammer. This one felt different. CCTV looked quiet on the surface, almost boring, like an abandoned security office with dusty monitors still glowing in the dark. But behind those cameras was a chain of weak trust relationships waiting to collapse one by one.
@@ -40,9 +43,9 @@ The web server immediately became the prime suspect because Easy HTB machines of
 
 ## Recon Screenshot
 
-```text
+
 ![Nmap Scan](assets/RECON.png)
-```
+
 
 To make local access cleaner, the hostname was added into `/etc/hosts`:
 
@@ -54,9 +57,9 @@ Once accessing the website, the homepage advertised CCTV services. Nothing explo
 
 ## Website Screenshot
 
-```text
-![Website Interface](images/nmap.png)
-```
+
+![Website Interface](images/WEBDETAIL.png)
+
 
 After clicking the login page, the underlying technology appeared: **ZoneMinder**.
 
@@ -70,9 +73,9 @@ gobuster dir -u http://cctv.htb -w /usr/share/wordlists/dirb/common.txt
 
 ## Gobuster Screenshot
 
-```text
-[ PLACE GOBUSTER SCREENSHOT HERE ]
-```
+
+![Discovery](assets/RECON.png)
+
 
 No obvious clues. No exposed changelog. No version leaks.
 
@@ -96,9 +99,9 @@ ZoneMinder v1.37.63
 
 ## Dashboard Screenshot
 
-```text
-![Nmap Scan](images/nmap.png)
-```
+
+![Nmap Scan](images/WEBDASHBOARD.png)
+
 
 ---
 
@@ -138,9 +141,9 @@ python3 exploit.py \
 
 ## SQLi Exploit Screenshot
 
-```text
-![Nmap Scan](images/nmap.png)
-```
+
+![SQLi Exploit POC](assets/CREDENTIALREUSE.png)
+
 
 Eventually, the database spilled its secrets.
 
