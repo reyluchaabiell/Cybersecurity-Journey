@@ -59,7 +59,7 @@ The visible website was only the lobby. The real case began after discovering th
 The first scan identified only two main doors: SSH and HTTP.
 
 ```bash
-nmap -sC -sV -Pn -oN nmap_initial.txt 10.129.244.202
+nmap -sCV -A --script vuln 10.129.244.202
 ```
 
 ![Nmap recon](assets/evidence_02_nmap-recon.png)
