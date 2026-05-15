@@ -1,6 +1,5 @@
 # VariaType HTB Machine Report
-
-> **Style:** Cyber Detective Investigation  
+ 
 > **Machine:** VariaType  
 > **Difficulty:** Medium  
 > **OS:** Linux  
