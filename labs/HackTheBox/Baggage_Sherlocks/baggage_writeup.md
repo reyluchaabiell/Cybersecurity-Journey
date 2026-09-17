@@ -3,6 +3,9 @@
 **Difficulty:** Very Easy\
 **Category:** DFIR
 
+<img width="800" height="800" alt="image" src="https://github.com/user-attachments/assets/10745cc6-53c2-4518-83c3-ac2a7282cac0" />
+
+
 ## Lesson Learned
 
 -   How to use Eric Zimmerman's ShellBags Explorer.
