@@ -2,9 +2,9 @@
 
 ---
 
-Author : Reylucha Biel
-Date of writing: September 13, 2026 
-Finished : September 20, 2026
+// Author : Reylucha Biel
+// Date of writing: September 13, 2026 
+// Finished : September 20, 2026
 
 ## 1. meta - sanity check - beginner
 
